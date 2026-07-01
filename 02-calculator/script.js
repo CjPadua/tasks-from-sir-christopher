@@ -53,20 +53,49 @@ function appendToTheExpression(value) {
    updateExpressionText(expressionText, expression);
 }
 
+function removeLastItemInTheExpression() {
+   const expressionArray = expression.split('');
+   expressionArray.pop();
+   expression = expressionArray.join('');
+}
+
+function checkIfItemIsOperator(item) {
+   const isItemInOperatorsArray = ['+', '-', '*', '/'].find((operator) => {
+      return operator === item
+   })
+
+   return isItemInOperatorsArray;
+}
+
 function processButtonPress(buttonType, buttonValue) {
    console.log(buttonType, buttonValue)
    switch (buttonType) {
       case 'number':
-         appendToTheExpression(buttonValue)
+         appendToTheExpression(buttonValue);
          break;
       case 'decimal-point':
-         if(expression.includes(".")) {
+
+         if(expression.includes('.')) {
             break;
          }
-         appendToTheExpression(buttonValue)
+         appendToTheExpression(buttonValue);
          break;
       case 'operator':
-         
+         const lastItemInExpression = expression.at(-1);
+
+         if(parseInt(lastItemInExpression)) {
+            appendToTheExpression(buttonValue);
+            break;
+         }
+
+         if(
+            checkIfItemIsOperator(lastItemInExpression) &&
+            lastItemInExpression !== buttonValue
+         ) {
+            removeLastItemInTheExpression()
+            appendToTheExpression(buttonValue);
+         }
+
          break;
       case 'command':
          
