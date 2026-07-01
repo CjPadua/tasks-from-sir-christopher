@@ -14,7 +14,11 @@ body {
    background-color: black;
 }
 
-.equation-text,
+.expression-and-result-container {
+   height: 4em;
+}
+
+.expression-text,
 .result-text {
    text-align: right;
 }
@@ -39,8 +43,8 @@ button {
    padding: 0.5em;
 }
 
-button[button-type="command"],
-button[button-type="operator"] {
+button[button_type="command"],
+button[button_type="operator"] {
    color: #FB7A1E;
 }
 
