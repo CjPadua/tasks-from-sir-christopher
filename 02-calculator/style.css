@@ -44,7 +44,8 @@ button[button-type="operator"] {
    color: #FB7A1E;
 }
 
-.button-zero {
+.button-zero,
+.button-clear {
    flex-grow: 1;
 }
 
