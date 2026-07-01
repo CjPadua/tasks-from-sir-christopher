@@ -44,19 +44,26 @@ const expressionText = document.getElementById("expression-text")
 let expression = '';
 let result = 0;
 
-function updateExpressionText() {
-   expressionText.textContent = expression
+function updateExpressionText(expressionText, newExpression) {
+   expressionText.textContent = expression;
+}
+
+function appendToTheExpression(value) {
+   expression += value;
+   updateExpressionText(expressionText, expression);
 }
 
 function processButtonPress(buttonType, buttonValue) {
    console.log(buttonType, buttonValue)
    switch (buttonType) {
       case 'number':
-         expression += buttonValue
-         updateExpressionText()
+         appendToTheExpression(buttonValue)
          break;
       case 'decimal-point':
-         
+         if(expression.includes(".")) {
+            break;
+         }
+         appendToTheExpression(buttonValue)
          break;
       case 'operator':
          
