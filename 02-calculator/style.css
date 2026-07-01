@@ -1,6 +1,9 @@
 * {
    margin: 0;
    box-sizing: border-box;
+   font-family: "Google Sans", sans-serif;
+   font-size: 28px;
+   color: #E6E6E6;
 }
 
 body {
@@ -8,6 +11,7 @@ body {
    display: flex;
    justify-content: center;
    align-items: center;
+   background-color: black;
 }
 
 .equation-text,
@@ -19,18 +23,35 @@ body {
    margin-top: 1em;
    display: flex;
    flex-direction: column;
-   gap: 0.25em;
+   gap: 0.35em;
 }
 
 div[class|="row"] {
    display: flex;
-   gap: 0.25em;
+   gap: 0.35em;
 }
 
 button {
-   width: 2em;
+   width: 2.5em;
+   border-radius: 0.5em;
+   border: 0;
+   background-color: #242424;
+   padding: 0.5em;
+}
+
+button[button-type="command"],
+button[button-type="operator"] {
+   color: #FB7A1E;
 }
 
 .button-zero {
    flex-grow: 1;
+}
+
+.color-light-gray {
+   color: #B3B3B3;
+}
+
+.enlarge-text {
+   font-size: 2em;
 }

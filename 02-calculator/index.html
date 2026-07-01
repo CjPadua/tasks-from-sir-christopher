@@ -5,46 +5,49 @@
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
    <title>Calculator</title>
    <link rel="stylesheet" href="style.css">
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+   <link href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap" rel="stylesheet">
 </head>
 <body>
    <div class="main-container">
       <div class="equation-and-result-container">
          <div class="equation-container">
-            <p class="equation-text" id="equation-text">6</p>
+            <p class="equation-text enlarge-text " id="equation-text">6</p>
          </div>
          <div class="result-container">
-            <p class="result-text">=6</p>
+            <p class="result-text color-light-gray">=6</p>
          </div>
       </div>
       <div class="buttons-container">
          <div class="row-1">
-            <button id="button-clear" class="button-clear">C</button>
-            <button id="button-backspace" class="button-backspace">&#8592</button>
-            <button id="button-percent" class="button-percent">&#37</button>
-            <button id="button-divide" class="button-divide">&#247</button>
+            <button id="button-clear" class="button-clear" button-type="command">C</button>
+            <button id="button-backspace" class="button-backspace" button-type="command">&#8592</button>
+            <button id="button-percent" class="button-percent" button-type="operator">&#37</button>
+            <button id="button-divide" class="button-divide" button-type="operator">&#247</button>
          </div>
          <div class="row-2">
-            <button id="button-seven" class="button-seven">7</button>
-            <button id="button-eight" class="button-eight">8</button>
-            <button id="button-nine" class="button-nine">9</button>
-            <button id="button-multiply" class="button-multiply">&#215</button>
+            <button id="button-seven" class="button-seven" button-type="number">7</button>
+            <button id="button-eight" class="button-eight" button-type="number">8</button>
+            <button id="button-nine" class="button-nine" button-type="number">9</button>
+            <button id="button-multiply" class="button-multiply" button-type="operator">&#215</button>
          </div>
          <div class="row-3">
-            <button id="button-four" class="button-four">4</button>
-            <button id="button-five" class="button-five">5</button>
-            <button id="button-six" class="button-six">6</button>
-            <button id="button-minus" class="button-minus">&#8722</button>
+            <button id="button-four" class="button-four" button-type="number">4</button>
+            <button id="button-five" class="button-five" button-type="number">5</button>
+            <button id="button-six" class="button-six" button-type="number">6</button>
+            <button id="button-minus" class="button-minus" button-type="operator">&#8722</button>
          </div>
          <div class="row-4">
-            <button id="button-one" class="button-one">1</button>
-            <button id="button-two" class="button-two">2</button>
-            <button id="button-three" class="button-three">3</button>
-            <button id="button-plus" class="button-plus">&#43</button>
+            <button id="button-one" class="button-one" button-type="number">1</button>
+            <button id="button-two" class="button-two" button-type="number">2</button>
+            <button id="button-three" class="button-three" button-type="number">3</button>
+            <button id="button-plus" class="button-plus" button-type="operator">&#43</button>
          </div>
          <div class="row-5">
-            <button id="button-zero" class="button-zero">0</button>
-            <button id="button-decimal" class="button-decimal">.</button>
-            <button id="button-equal" class="button-equal">&#61</button>
+            <button id="button-zero" class="button-zero" button-type="number">0</button>
+            <button id="button-decimal" class="button-decimal" button-type="decimal-point">.</button>
+            <button id="button-equal" class="button-equal" button-type="command">&#61</button>
          </div>
       </div>
    </div>
