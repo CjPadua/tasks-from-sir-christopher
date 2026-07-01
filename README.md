@@ -10,3 +10,7 @@ Each rectangle demonstrates the action of the button above it.
 - Third button colors its rectangle red.
 - Fourth button colors its rectangle blue.
 - Fifth button colors its rectangle green.
+
+## 2. Calculator
+
+### Description
