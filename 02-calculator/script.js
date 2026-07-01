@@ -40,17 +40,19 @@
  *                reject the input
  */
 
-const expressionText = document.getElementById("expression-text")
+const expressionText = document.getElementById("expression-text");
+const resultText = document.getElementById("result-text");
+
 let expression = '';
 let result = 0;
 
-function updateExpressionText(expressionText, newExpression) {
+function updateExpressionText() {
    expressionText.textContent = expression;
 }
 
 function appendToTheExpression(value) {
    expression += value;
-   updateExpressionText(expressionText, expression);
+   updateExpressionText();
 }
 
 function removeLastItemInTheExpression() {
@@ -73,6 +75,7 @@ function processButtonPress(buttonType, buttonValue) {
       case 'number':
          appendToTheExpression(buttonValue);
          break;
+
       case 'decimal-point':
 
          if(expression.includes('.')) {
@@ -80,6 +83,7 @@ function processButtonPress(buttonType, buttonValue) {
          }
          appendToTheExpression(buttonValue);
          break;
+
       case 'operator':
          const lastItemInExpression = expression.at(-1);
 
@@ -97,7 +101,31 @@ function processButtonPress(buttonType, buttonValue) {
          }
 
          break;
+
       case 'command':
+         
+         switch (buttonValue) {
+            case 'equal':
+               
+               try {
+                  result = eval(expression);
+               } catch (error) {
+                  result = "Error"
+               }
+
+               resultText.textContent = result;
+               break;
+
+            case 'backspace':
+               removeLastItemInTheExpression();
+               updateExpressionText();
+               break;
+
+            case 'clear':
+               expression = '';
+               updateExpressionText();
+               break;
+         }
          
          break;
    }
