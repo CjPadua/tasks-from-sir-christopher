@@ -1,0 +1,36 @@
+* {
+   margin: 0;
+   box-sizing: border-box;
+}
+
+body {
+   height: 100vh;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+}
+
+.equation-text,
+.result-text {
+   text-align: right;
+}
+
+.buttons-container {
+   margin-top: 1em;
+   display: flex;
+   flex-direction: column;
+   gap: 0.25em;
+}
+
+div[class|="row"] {
+   display: flex;
+   gap: 0.25em;
+}
+
+button {
+   width: 2em;
+}
+
+.button-zero {
+   flex-grow: 1;
+}
