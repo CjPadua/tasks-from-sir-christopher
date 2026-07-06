@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Calculator</title>
+   <link rel="stylesheet" href="style.css">
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+   <link href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap" rel="stylesheet">
+   <script src="script.js" defer></script>
+</head>
+<body>
+   <div class="main-container">
+      <div class="expression-and-result-container">
+         <div class="expression-container">
+            <input class="expression-text enlarge-text " id="expression-text"></input>
+         </div>
+         <div class="result-container">
+            <input id="result-text" class="result-text color-light-gray"></input>
+         </div>
+      </div>
+      <div class="buttons-container">
+         <div class="row-1">
+            <button id="button-clear" class="button-clear" button_type="command" value="clear">C</button>
+            <button id="button-backspace" class="button-backspace" button_type="command"  value="backspace">&#8592</button>
+            <button id="button-divide" class="button-divide" button_type="operator" value="/">&#247</button>
+         </div>
+         <div class="row-2">
+            <button id="button-seven" class="button-seven" button_type="number" value="7">7</button>
+            <button id="button-eight" class="button-eight" button_type="number" value="8">8</button>
+            <button id="button-nine" class="button-nine" button_type="number" value="9">9</button>
+            <button id="button-multiply" class="button-multiply" button_type="operator" value="*">&#215</button>
+         </div>
+         <div class="row-3">
+            <button id="button-four" class="button-four" button_type="number" value="4">4</button>
+            <button id="button-five" class="button-five" button_type="number" value="5">5</button>
+            <button id="button-six" class="button-six" button_type="number" value="6">6</button>
+            <button id="button-minus" class="button-minus" button_type="operator" value="-">&#8722</button>
+         </div>
+         <div class="row-4">
+            <button id="button-one" class="button-one" button_type="number" value="1">1</button>
+            <button id="button-two" class="button-two" button_type="number" value="2">2</button>
+            <button id="button-three" class="button-three" button_type="number" value="3">3</button>
+            <button id="button-plus" class="button-plus" button_type="operator" value="+">&#43</button>
+         </div>
+         <div class="row-5">
+            <button id="button-zero" class="button-zero" button_type="number" value="0">0</button>
+            <button id="button-decimal" class="button-decimal" button_type="decimal-point" value=".">.</button>
+            <button id="button-equal" class="button-equal" button_type="command" value="equal">&#61</button>
+         </div>
+      </div>
+   </div>
+</body>
+</html>
