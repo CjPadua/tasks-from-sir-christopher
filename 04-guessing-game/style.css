@@ -1,0 +1,17 @@
+* {
+   box-sizing: border-box;
+   margin: 0;
+}
+
+div[class*="color-ball"] {
+   border-radius: 100%;
+   background-color: black;
+   height: 1em;
+   width: 1em;
+}
+
+.answer-container,
+.guess-container {
+   display: flex;
+   gap: 0.25em;
+}
