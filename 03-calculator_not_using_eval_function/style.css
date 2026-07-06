@@ -72,3 +72,8 @@ button[button_type="operator"] {
 .enlarge-text {
    font-size: 2em;
 }
+
+input:focus {
+   border: none;
+   outline: none;
+}

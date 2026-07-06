@@ -150,9 +150,19 @@ function evaluateExpressionV2(expression) {
    let term1, term2, operation, result;
 
    while(operators.length > 0) {
-      operation = operators[0];
-      term1 = Number(numbers[0]);
-      term2 = Number(numbers[1]);
+      
+      const mdOperatorIndex = operators.findIndex((operator) => ["*", "/"].includes(operator));
+
+      if(mdOperatorIndex >= 0) {
+         operation = operators[mdOperatorIndex];
+         term1 = Number(numbers[mdOperatorIndex]);
+         term2 = Number(numbers[mdOperatorIndex + 1]);
+      }
+      else {
+         operation = operators[0];
+         term1 = Number(numbers[0]);
+         term2 = Number(numbers[1]);
+      }
 
       switch (operation) {
          case "+":
@@ -169,10 +179,17 @@ function evaluateExpressionV2(expression) {
             break;
       }
 
-      numbers.shift();
-      operators.shift();
+      if(mdOperatorIndex >= 0) {
+         numbers.splice(mdOperatorIndex, 2, result);
+         operators.splice(mdOperatorIndex, 1);
+      }
+      else {
+         numbers.shift();
+         operators.shift();
 
-      numbers[0] = result;
+         numbers[0] = result;
+      }
+
    }
 
    return result;
@@ -204,8 +221,6 @@ function evaluateExpression(expression) {
 }
 
 function processButtonPress(buttonType, buttonValue) {
-   console.log(buttonType, buttonValue)
-
    if(equalButtonToggled) {
       switchHighlightBetweenExpressionAndResult();
    }
@@ -237,7 +252,7 @@ function processButtonPress(buttonType, buttonValue) {
 
          const lastItemInExpression = expression.at(-1);
 
-         if(parseInt(lastItemInExpression)) {
+         if(parseInt(lastItemInExpression) || lastItemInExpression === '0') {
             appendToTheExpression(buttonValue);
             setEqualButtonToggledFalse();
             break;
@@ -262,7 +277,7 @@ function processButtonPress(buttonType, buttonValue) {
                equalButtonToggled = true;
                
                try {
-                  result = eval(expression);
+                  result = evaluateExpressionV2(expression);
                } catch (error) {
                   result = "Error"
                }
