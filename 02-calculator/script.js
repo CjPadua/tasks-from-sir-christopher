@@ -46,8 +46,10 @@ const resultText = document.getElementById("result-text");
 let expression = '';
 let result = 0;
 
+let equalButtonToggled = false;
+
 function updateExpressionText() {
-   expressionText.textContent = expression;
+   expressionText.value = expression;
 }
 
 function appendToTheExpression(value) {
@@ -69,11 +71,39 @@ function checkIfItemIsOperator(item) {
    return isItemInOperatorsArray;
 }
 
+function switchHighlightBetweenExpressionAndResult() {
+   expressionText.classList.toggle("enlarge-text");
+   expressionText.classList.toggle("color-light-gray");
+   resultText.classList.toggle("enlarge-text");
+   resultText.classList.toggle("color-light-gray");
+}
+
+function setEqualButtonToggledFalse() {
+   equalButtonToggled = false;
+}
+
+function clearExpressionAndResult() {
+   expression = '';
+   result = '';
+   updateExpressionText();
+   resultText.value = result;
+}
+
 function processButtonPress(buttonType, buttonValue) {
    console.log(buttonType, buttonValue)
+
+   if(equalButtonToggled) {
+      switchHighlightBetweenExpressionAndResult();
+   }
+
    switch (buttonType) {
       case 'number':
+         if(equalButtonToggled) {
+            clearExpressionAndResult();
+         }
+
          appendToTheExpression(buttonValue);
+         setEqualButtonToggledFalse();
          break;
 
       case 'decimal-point':
@@ -82,13 +112,20 @@ function processButtonPress(buttonType, buttonValue) {
             break;
          }
          appendToTheExpression(buttonValue);
+         setEqualButtonToggledFalse();
          break;
 
       case 'operator':
+
+         if(equalButtonToggled) {
+            expression = result.toLocaleString();
+         }
+
          const lastItemInExpression = expression.at(-1);
 
          if(parseInt(lastItemInExpression)) {
             appendToTheExpression(buttonValue);
+            setEqualButtonToggledFalse();
             break;
          }
 
@@ -99,13 +136,16 @@ function processButtonPress(buttonType, buttonValue) {
             removeLastItemInTheExpression()
             appendToTheExpression(buttonValue);
          }
-
+         
+         setEqualButtonToggledFalse();
          break;
 
       case 'command':
          
          switch (buttonValue) {
             case 'equal':
+
+               equalButtonToggled = true;
                
                try {
                   result = eval(expression);
@@ -113,20 +153,25 @@ function processButtonPress(buttonType, buttonValue) {
                   result = "Error"
                }
 
-               resultText.textContent = result;
+               // expression = result.toLocaleString();
+               resultText.value = result;
+
+               switchHighlightBetweenExpressionAndResult();
                break;
 
             case 'backspace':
                removeLastItemInTheExpression();
                updateExpressionText();
+               setEqualButtonToggledFalse();
+
                break;
 
             case 'clear':
-               expression = '';
-               updateExpressionText();
+               clearExpressionAndResult();
+               setEqualButtonToggledFalse();
                break;
          }
-         
+
          break;
    }
 }

@@ -14,13 +14,25 @@ body {
    background-color: black;
 }
 
+.main-container {
+   width: min-content;
+}
+
 .expression-and-result-container {
    height: 4em;
+}
+
+.expression-container, 
+.result-container {
+   display: flex;
 }
 
 .expression-text,
 .result-text {
    text-align: right;
+   background-color: black;
+   border: 0;
+   width: 100%;
 }
 
 .buttons-container {
