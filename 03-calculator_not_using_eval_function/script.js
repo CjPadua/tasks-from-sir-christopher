@@ -91,25 +91,7 @@ function clearExpressionAndResult() {
 
 function identifyOperation(expression) {
    const operator = expression.match(/[+\-\*\/]/)[0];
-   
-   let operation;
-
-   switch (operator) {
-      case "+":
-         operation = "addition";
-         break;
-      case "-":
-         operation = "subtraction";
-         break;
-      case "*":
-         operation = "multiplication";
-         break;
-      case "/":
-         operation = "division";
-         break;
-   }
-
-   return operation;
+   return operator;
 }
 
 function addTwoNumbers(addend1, addend2) {
@@ -132,9 +114,69 @@ function divideTwoNumbers(dividend, divisor) {
    return quotient;
 }
 
-/**
+/** Receive 2 + 2 - 2
+ * Evaluate 2 + 2
+ * replace 2 + 2 with 4 
+ * new equation = 4 - 2
+ * evaluate 4 - 2 
+ * result = 2
  * 
+ * Receive 2 + 2 - 2
+ * split into numbers array and operators array
+ * 
+ * numbers = [2, 2, 2]
+ * operators = [+, -]
+ * 
+ * check if operators array is not empty
+ * 
+ * if empty, return result
+ * 
+ * else, proceed
+ * 
+ * feed operator[0] into identify operation function
+ * feed numbers[0] and numbers[1] to the operation function
+ * 
+ * remove numbers [1]
+ * replace numbers[0] with the result
+ * 
+ * remove [0]
  */
+
+function evaluateExpressionV2(expression) {
+   const operatorsRegex = /[+\-\*\/]/g;
+   const numbers = expression.split(operatorsRegex);
+   const operators = expression.match(operatorsRegex);
+
+   let term1, term2, operation, result;
+
+   while(operators.length > 0) {
+      operation = operators[0];
+      term1 = Number(numbers[0]);
+      term2 = Number(numbers[1]);
+
+      switch (operation) {
+         case "+":
+            result = addTwoNumbers(term1, term2);
+            break;
+         case "-":
+            result = subtractTwoNumbers(term1, term2);
+            break;
+         case "*":
+            result = multiplyTwoNumbers(term1, term2);
+            break;
+         case "/":
+            result = divideTwoNumbers(term1, term2);
+            break;
+      }
+
+      numbers.shift();
+      operators.shift();
+
+      numbers[0] = result;
+   }
+
+   return result;
+}
 
 function evaluateExpression(expression) {
    let result;
@@ -144,16 +186,16 @@ function evaluateExpression(expression) {
    const term2 = Number(separatedExpression[1]);
 
    switch (operation) {
-      case "addition":
+      case "+":
          result = addTwoNumbers(term1, term2);
          break;
-      case "subtraction":
+      case "-":
          result = subtractTwoNumbers(term1, term2);
          break;
-      case "multiplication":
+      case "*":
          result = multiplyTwoNumbers(term1, term2);
          break;
-      case "division":
+      case "/":
          result = divideTwoNumbers(term1, term2);
          break;
    }
