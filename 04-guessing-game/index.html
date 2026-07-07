@@ -9,22 +9,27 @@
 </head>
 <body>
    <div id="main-container" class="main-container">
+      <div id="title-bar" class="title-bar">
+         <p id="title-text" class="title-text">Can you guess the colors?</p>
+         <button id="start-btn" class="start-btn">
+            Start
+         </button>
+      </div>
       <div id="answer-container" class="answer-container">
          <div id="answer-color-ball-1" class="answer-color-ball-1"></div>
          <div id="answer-color-ball-2" class="answer-color-ball-2"></div>
          <div id="answer-color-ball-3" class="answer-color-ball-3"></div>
          <div id="answer-color-ball-4" class="answer-color-ball-4"></div>
-         <button id="surrender-btn" class="surrender-btn">S</button>
+         <button id="surrender-btn" class="surrender-btn" style="display: none;">S</button>
       </div>
-   </div>
-   <div id="guessing-container" class="guessing-container">
+      <div id="guessing-container" class="guessing-container" style="display: none;">
          <div id="guess-color-ball-1" class="guess-color-ball-1" color=""></div>
          <div id="guess-color-ball-2" class="guess-color-ball-2" color=""></div>
          <div id="guess-color-ball-3" class="guess-color-ball-3" color=""></div>
          <div id="guess-color-ball-4" class="guess-color-ball-4" color=""></div>
          <button id="guess-btn" class="guess-btn">G</button>
-   </div>
-   <div id="guesses-container" class="guesses-container">
+      </div>
+      <div id="guesses-container" class="guesses-container"></div>
    </div>
 </body>
 </html>

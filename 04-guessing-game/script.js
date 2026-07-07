@@ -21,11 +21,16 @@
 
 const COLORS_LIST = ["red", "green", "blue", "yellow"];
 const COLORS_COUNT = 4;
+
+const guessingContainer = document.getElementById("guessing-container");
 const guessingColorBalls = document.querySelectorAll("div.guessing-container > div");
 const guessesContainer = document.getElementById("guesses-container");
-
 const guessBtn = document.getElementById("guess-btn");
 
+const startBtn = document.getElementById("start-btn");
+const titleText = document.getElementById("title-text");
+
+const surrenderBtn = document.getElementById("surrender-btn");
 
 function getRandomColors(numberOfColors) {
 
@@ -44,27 +49,6 @@ function getRandomColors(numberOfColors) {
 
    return randomColors;
 }
-
-
-guessingColorBalls.forEach((guessingColorBall) => {
-
-   function getNextColor(currentColor) {
-      const currentIndex = COLORS_LIST.findIndex((color) => color === currentColor);
-   
-      if(currentIndex < 3) {
-         return COLORS_LIST[currentIndex + 1]
-      }
-      
-      return "red";
-   }
-
-   guessingColorBall.addEventListener("click", () => {
-      const nextColor = getNextColor(guessingColorBall.attributes.color.value)
-
-      guessingColorBall.style.backgroundColor = nextColor;
-      guessingColorBall.attributes.color.value = nextColor;
-   })
-})
 
 function displayGuess(guesses, score) {
 
@@ -133,3 +117,31 @@ function play() {
       return score;
    })
 }
+
+startBtn.addEventListener("click", () => {
+   guessingContainer.style.display = "flex"
+   startBtn.style.display = "none";
+   surrenderBtn.style.display = "block"
+   titleText.textContent = "Guess the Colors";
+   play();
+})
+
+guessingColorBalls.forEach((guessingColorBall) => {
+
+   function getNextColor(currentColor) {
+      const currentIndex = COLORS_LIST.findIndex((color) => color === currentColor);
+   
+      if(currentIndex < 3) {
+         return COLORS_LIST[currentIndex + 1]
+      }
+      
+      return "red";
+   }
+
+   guessingColorBall.addEventListener("click", () => {
+      const nextColor = getNextColor(guessingColorBall.attributes.color.value)
+
+      guessingColorBall.style.backgroundColor = nextColor;
+      guessingColorBall.attributes.color.value = nextColor;
+   })
+})
