@@ -23,6 +23,8 @@ const COLORS_LIST = ["red", "green", "blue", "yellow"];
 const COLORS_COUNT = 4;
 const guessingColorBalls = document.querySelectorAll("div.guessing-container > div");
 
+const guessBtn = document.getElementById("guess-btn");
+
 function getRandomColor(listOfColors) {
    const randomNumber = Math.random();
    const randomIndex = Math.floor(randomNumber * listOfColors.length);
@@ -58,3 +60,34 @@ guessingColorBalls.forEach((guessingColorBall) => {
       guessingColorBall.attributes.color.value = nextColor;
    })
 })
+
+function getScore(answers, guesses) {
+   let score = 0;
+
+   guesses.forEach((guess, index) => {
+      if(guess === answers[index]) {
+         score++;
+      }
+   })
+
+   return score;
+}
+
+function play() {
+   const answers = getRandomColors(COLORS_COUNT);
+   console.log(answers)
+   
+   guessBtn.addEventListener("click", () => {
+      const guesses = [];
+
+      guessingColorBalls.forEach(
+         (guessingColorBall) => {
+            guesses.push(guessingColorBall.attributes.color.value);
+         }
+      )
+
+      const score = getScore(answers, guesses);
+      console.log(score)
+      return score;
+   })
+}
