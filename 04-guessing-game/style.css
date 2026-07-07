@@ -5,13 +5,13 @@
 
 div[class*="color-ball"] {
    border-radius: 100%;
-   background-color: black;
-   height: 1em;
-   width: 1em;
+   background-color: gray;
+   height: 2em;
+   width: 2em;
 }
 
 .answer-container,
-.guess-container {
+.guessing-container {
    display: flex;
    gap: 0.25em;
 }
