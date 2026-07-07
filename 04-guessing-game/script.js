@@ -24,6 +24,7 @@ const COLORS_COUNT = 4;
 
 const guessingContainer = document.getElementById("guessing-container");
 const guessingColorBalls = document.querySelectorAll("div.guessing-container > div");
+const answerColorBalls = document.querySelectorAll("div.answer-container > div");
 const guessesContainer = document.getElementById("guesses-container");
 const guessBtn = document.getElementById("guess-btn");
 
@@ -85,6 +86,12 @@ function displayGuess(guesses, score) {
    resetGuessColorBalls();
 }
 
+function revealAnswers(answers) {
+   answerColorBalls.forEach((answerColorBall, index) => {
+      answerColorBall.style.backgroundColor = answers[index];
+   })
+}
+
 function play() {
 
    function getScore(answers, guesses) {
@@ -101,6 +108,10 @@ function play() {
    
    const answers = getRandomColors(COLORS_COUNT);
    console.log(answers)
+
+   surrenderBtn.addEventListener("click", () => {
+      revealAnswers(answers);
+   })
    
    guessBtn.addEventListener("click", () => {
       const guesses = [];
@@ -125,6 +136,8 @@ startBtn.addEventListener("click", () => {
    titleText.textContent = "Guess the Colors";
    play();
 })
+
+
 
 guessingColorBalls.forEach((guessingColorBall) => {
 
