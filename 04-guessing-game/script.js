@@ -22,6 +22,7 @@
 const COLORS_LIST = ["red", "green", "blue", "yellow"];
 const COLORS_COUNT = 4;
 const guessingColorBalls = document.querySelectorAll("div.guessing-container > div");
+const guessesContainer = document.getElementById("guesses-container");
 
 const guessBtn = document.getElementById("guess-btn");
 
@@ -73,6 +74,40 @@ function getScore(answers, guesses) {
    return score;
 }
 
+function resetGuessColorBalls() {
+   guessingColorBalls.forEach((guessColorBall) => {
+      guessColorBall.style.backgroundColor = "gray";
+      guessColorBall.attributes.color.value = "";
+   })
+}
+
+function displayGuess(guesses, score) {
+   const guessContainer = document.createElement("div");
+   guessContainer.classList.add("guess");
+
+   guesses.forEach((guess) => {
+      const colorBall = document.createElement("div");
+      colorBall.classList.add("color-ball");
+      colorBall.style.backgroundColor = guess;
+
+      guessContainer.appendChild(colorBall);
+   })
+
+   const scoreText = document.createElement("p");
+   scoreText.textContent = score;
+
+   guessContainer.appendChild(scoreText);
+
+   if(guessesContainer.childElementCount < 1) {
+      guessesContainer.appendChild(guessContainer);
+   }
+   else {
+      guessesContainer.insertBefore(guessContainer, guessesContainer.firstElementChild);
+   }
+
+   resetGuessColorBalls();
+}
+
 function play() {
    const answers = getRandomColors(COLORS_COUNT);
    console.log(answers)
@@ -87,7 +122,8 @@ function play() {
       )
 
       const score = getScore(answers, guesses);
-      console.log(score)
+      displayGuess(guesses, score);
+
       return score;
    })
 }

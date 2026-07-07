@@ -15,3 +15,9 @@ div[class*="color-ball"] {
    display: flex;
    gap: 0.25em;
 }
+
+.guess {
+   display: flex;
+   align-items: center;
+   gap: 0.25em;
+}
