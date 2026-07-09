@@ -85,6 +85,7 @@ function displayGuess(guesses, score) {
    })
 
    const scoreText = document.createElement("p");
+   scoreText.classList.add("score-text")
    scoreText.textContent = score;
 
    guessContainer.appendChild(scoreText);
@@ -108,6 +109,7 @@ function resetTheGame() {
 
    surrenderBtn.style.display  = "none";
    guessingContainer.style.display = "none";
+   guessesContainer.style.display = "none";
 
    document.querySelectorAll("div[class*='color-ball']").forEach((colorBall) => {
       colorBall.style.backgroundColor = "gray";
@@ -117,7 +119,7 @@ function resetTheGame() {
       guessingColorBall.attributes.color.value = "gray";
    })
 
-   titleText.textContent = "Can you guess the colors?";
+   titleText.textContent = "Guess the Colors";
    startBtn.style.display = "block";
 
    surrenderBtn.disabled = false;
@@ -146,7 +148,7 @@ function endGame(answers, userWin) {
    titleText.textContent = userWin ? "You Win." : "You Lose.";
 
    revealAnswers(answers);
-   setTimeout(resetTheGame, 2000);
+   setTimeout(resetTheGame, 3000);
 }
 
 function play() {
@@ -185,6 +187,7 @@ function play() {
 
 startBtn.addEventListener("click", () => {
    guessingContainer.style.display = "flex"
+   guessesContainer.style.display = "flex";
    startBtn.style.display = "none";
    surrenderBtn.style.display = "block"
    titleText.textContent = "Guess the Colors";
