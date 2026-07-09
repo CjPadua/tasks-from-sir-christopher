@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <style>
+    body { background: #1a1a1a; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; }
+    
+    /* The main window wrapper */
+    .custom-window {
+      position: absolute;
+      width: 300px;
+      height: 200px;
+      background: #fff;
+      border-radius: 6px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      user-select: none;
+      left: 0; top: 0; /* Initiated at 0,0 so transforms handle the rest */
+    }
+
+    /* Header titlebar */
+    .window-header {
+      background: #252b4e;
+      color: white;
+      padding: 10px;
+      cursor: move;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .window-title { font-weight: bold; font-size: 14px; }
+    .window-close { cursor: pointer; background: #ff005d; border: none; color: white; border-radius: 3px; padding: 2px 8px; }
+
+    /* Window content area */
+    .window-body {
+      padding: 15px;
+      flex: 1;
+      overflow: auto;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+
+  <button onclick="createWindow('My Window', 'Hello World!')" style="margin:20px; padding:10px;">New Window</button>
+
+  <script src="window.js"></script>
+</body>
+</html>
