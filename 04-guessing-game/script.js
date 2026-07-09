@@ -139,18 +139,23 @@ function getScore(answers, guesses) {
    return score;
 }
 
+function endGame(answers, userWin) {
+   surrenderBtn.disabled = "true";
+   guessBtn.disabled = true;
+
+   titleText.textContent = userWin ? "You Win." : "You Lose.";
+
+   revealAnswers(answers);
+   setTimeout(resetTheGame, 2000);
+}
+
 function play() {
    
    const answers = getRandomColors(COLORS_COUNT);
    console.log(answers)
 
    handleUserSurrender = () => {
-      surrenderBtn.disabled = "true";
-      guessBtn.disabled = true;
-      revealAnswers(answers);
-      titleText.textContent = "You Lose."
-
-      setTimeout(resetTheGame, 2000);
+      endGame(answers, false);
    }
 
    handleGuessBtnClick = () => {
@@ -163,6 +168,12 @@ function play() {
       )
 
       const score = getScore(answers, guesses);
+
+      if(score === 4) {
+         endGame(answers, true);
+         return;
+      }
+
       displayGuess(guesses, score);
 
       return score;
