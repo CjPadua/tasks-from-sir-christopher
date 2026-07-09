@@ -19,7 +19,7 @@
  * 
  */
 
-const COLORS_LIST = ["red", "green", "blue", "yellow"];
+const COLORS_LIST = ["red", "green", "blue", "yellow", "orange"];
 const COLORS_COUNT = 4;
 
 const guessingContainer = document.getElementById("guessing-container");
@@ -38,13 +38,15 @@ let handleUserSurrender, handleGuessBtnClick;
 let answerColorBallsIntervals = [];
 
 function getNextColor(currentColor) {
-   const currentIndex = COLORS_LIST.findIndex((color) => color === currentColor);
+   let currentIndex = COLORS_LIST.findIndex((color) => color === currentColor);
 
-   if(currentIndex < 3) {
-      return COLORS_LIST[currentIndex + 1]
+   currentIndex++;
+
+   if(currentIndex >= COLORS_LIST.length) {
+      currentIndex = 0;
    }
    
-   return "red";
+   return COLORS_LIST[currentIndex];
 }
 
 guessingColorBalls.forEach((guessingColorBall) => {
