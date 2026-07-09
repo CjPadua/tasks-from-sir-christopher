@@ -35,6 +35,8 @@ const surrenderBtn = document.getElementById("surrender-btn");
 
 let handleUserSurrender, handleGuessBtnClick;
 
+let answerColorBallsIntervals = [];
+
 function getNextColor(currentColor) {
    const currentIndex = COLORS_LIST.findIndex((color) => color === currentColor);
 
@@ -99,17 +101,24 @@ function displayGuess(guesses, score) {
 }
 
 function revealAnswers(answers) {
+   answerColorBallsIntervals.forEach((interval) => {
+      clearInterval(interval);
+   });
+
+   answerColorBallsIntervals = [];
+
    answerColorBalls.forEach((answerColorBall, index) => {
       answerColorBall.style.backgroundColor = answers[index];
-   })
+   });
+
+   guessesContainer.replaceChildren();
+   guessesContainer.style.display = "none";
 }
 
 function resetTheGame() {
-   guessesContainer.replaceChildren();
 
    surrenderBtn.style.display  = "none";
    guessingContainer.style.display = "none";
-   guessesContainer.style.display = "none";
 
    document.querySelectorAll("div[class*='color-ball']").forEach((colorBall) => {
       colorBall.style.backgroundColor = "gray";
@@ -117,7 +126,7 @@ function resetTheGame() {
 
    guessingColorBalls.forEach((guessingColorBall) => {
       guessingColorBall.attributes.color.value = "red";
-      guessingColorBall.style.backgroundColor = "gray";
+      guessingColorBall.style.backgroundColor = "red";
    })
 
    titleText.textContent = "Guess the Colors";
@@ -128,6 +137,8 @@ function resetTheGame() {
 
    surrenderBtn.removeEventListener("click", handleUserSurrender);
    guessBtn.removeEventListener("click", handleGuessBtnClick);
+
+   addColorBallsColorIntervals();
 }
 
 function getScore(answers, guesses) {
@@ -194,3 +205,18 @@ startBtn.addEventListener("click", () => {
    titleText.textContent = "Guess the Colors";
    play();
 })
+
+function addColorBallsColorIntervals() {
+   answerColorBalls.forEach((answerColorBall, index) => {
+      answerColorBall.style.backgroundColor = COLORS_LIST[index];
+   
+      const interval = setInterval(() => {
+         const currentColor = answerColorBall.style.backgroundColor;
+         answerColorBall.style.backgroundColor = getNextColor(currentColor)
+      }, 1000)
+   
+      answerColorBallsIntervals.push(interval);
+   })
+}
+
+addColorBallsColorIntervals();
