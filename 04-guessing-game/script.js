@@ -116,7 +116,8 @@ function resetTheGame() {
    })
 
    guessingColorBalls.forEach((guessingColorBall) => {
-      guessingColorBall.attributes.color.value = "gray";
+      guessingColorBall.attributes.color.value = "red";
+      guessingColorBall.style.backgroundColor = "gray";
    })
 
    titleText.textContent = "Guess the Colors";
@@ -148,7 +149,7 @@ function endGame(answers, userWin) {
    titleText.textContent = userWin ? "You Win." : "You Lose.";
 
    revealAnswers(answers);
-   setTimeout(resetTheGame, 3000);
+   setTimeout(resetTheGame, 2500);
 }
 
 function play() {

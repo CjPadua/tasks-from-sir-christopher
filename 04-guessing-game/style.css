@@ -42,6 +42,10 @@ div[class*="color-ball"] {
    border: 3px ridge darkgray;
 }
 
+div[class*="guess-color-ball"] {
+   background-color: red;
+}
+
 .answer-container,
 .guessing-container {
    display: flex;
