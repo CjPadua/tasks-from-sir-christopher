@@ -33,15 +33,35 @@ const titleText = document.getElementById("title-text");
 
 const surrenderBtn = document.getElementById("surrender-btn");
 
-function getRandomColors(numberOfColors) {
+let handleUserSurrender, handleGuessBtnClick;
 
-   function getRandomColor(listOfColors) {
-      const randomNumber = Math.random();
-      const randomIndex = Math.floor(randomNumber * listOfColors.length);
-   
-      return listOfColors[randomIndex];
+function getNextColor(currentColor) {
+   const currentIndex = COLORS_LIST.findIndex((color) => color === currentColor);
+
+   if(currentIndex < 3) {
+      return COLORS_LIST[currentIndex + 1]
    }
+   
+   return "red";
+}
 
+guessingColorBalls.forEach((guessingColorBall) => {
+   guessingColorBall.addEventListener("click", () => {
+      const nextColor = getNextColor(guessingColorBall.attributes.color.value)
+
+      guessingColorBall.style.backgroundColor = nextColor;
+      guessingColorBall.attributes.color.value = nextColor;
+   })
+})
+
+function getRandomColor(listOfColors) {
+   const randomNumber = Math.random();
+   const randomIndex = Math.floor(randomNumber * listOfColors.length);
+
+   return listOfColors[randomIndex];
+}
+
+function getRandomColors(numberOfColors) {
    const randomColors = [];
 
    for (let counter = 0; counter < numberOfColors; counter++) {
@@ -52,13 +72,6 @@ function getRandomColors(numberOfColors) {
 }
 
 function displayGuess(guesses, score) {
-
-   function resetGuessColorBalls() {
-      guessingColorBalls.forEach((guessColorBall) => {
-         guessColorBall.style.backgroundColor = "gray";
-         guessColorBall.attributes.color.value = "";
-      })
-   }
 
    const guessContainer = document.createElement("div");
    guessContainer.classList.add("guess");
@@ -82,8 +95,6 @@ function displayGuess(guesses, score) {
    else {
       guessesContainer.insertBefore(guessContainer, guessesContainer.firstElementChild);
    }
-
-   resetGuessColorBalls();
 }
 
 function revealAnswers(answers) {
@@ -92,28 +103,57 @@ function revealAnswers(answers) {
    })
 }
 
+function resetTheGame() {
+   guessesContainer.replaceChildren();
+
+   surrenderBtn.style.display  = "none";
+   guessingContainer.style.display = "none";
+
+   document.querySelectorAll("div[class*='color-ball']").forEach((colorBall) => {
+      colorBall.style.backgroundColor = "gray";
+   })
+
+   guessingColorBalls.forEach((guessingColorBall) => {
+      guessingColorBall.attributes.color.value = "gray";
+   })
+
+   titleText.textContent = "Can you guess the colors?";
+   startBtn.style.display = "block";
+
+   surrenderBtn.disabled = false;
+   guessBtn.disabled = false;
+
+   surrenderBtn.removeEventListener("click", handleUserSurrender);
+   guessBtn.removeEventListener("click", handleGuessBtnClick);
+}
+
+function getScore(answers, guesses) {
+   let score = 0;
+
+   guesses.forEach((guess, index) => {
+      if(guess === answers[index]) {
+         score++;
+      }
+   })
+
+   return score;
+}
+
 function play() {
-
-   function getScore(answers, guesses) {
-      let score = 0;
-
-      guesses.forEach((guess, index) => {
-         if(guess === answers[index]) {
-            score++;
-         }
-      })
-
-      return score;
-   }
    
    const answers = getRandomColors(COLORS_COUNT);
    console.log(answers)
 
-   surrenderBtn.addEventListener("click", () => {
+   handleUserSurrender = () => {
+      surrenderBtn.disabled = "true";
+      guessBtn.disabled = true;
       revealAnswers(answers);
-   })
-   
-   guessBtn.addEventListener("click", () => {
+      titleText.textContent = "You Lose."
+
+      setTimeout(resetTheGame, 2000);
+   }
+
+   handleGuessBtnClick = () => {
       const guesses = [];
 
       guessingColorBalls.forEach(
@@ -126,7 +166,10 @@ function play() {
       displayGuess(guesses, score);
 
       return score;
-   })
+   }
+   
+   surrenderBtn.addEventListener("click", handleUserSurrender);
+   guessBtn.addEventListener("click", handleGuessBtnClick);
 }
 
 startBtn.addEventListener("click", () => {
@@ -135,26 +178,4 @@ startBtn.addEventListener("click", () => {
    surrenderBtn.style.display = "block"
    titleText.textContent = "Guess the Colors";
    play();
-})
-
-
-
-guessingColorBalls.forEach((guessingColorBall) => {
-
-   function getNextColor(currentColor) {
-      const currentIndex = COLORS_LIST.findIndex((color) => color === currentColor);
-   
-      if(currentIndex < 3) {
-         return COLORS_LIST[currentIndex + 1]
-      }
-      
-      return "red";
-   }
-
-   guessingColorBall.addEventListener("click", () => {
-      const nextColor = getNextColor(guessingColorBall.attributes.color.value)
-
-      guessingColorBall.style.backgroundColor = nextColor;
-      guessingColorBall.attributes.color.value = nextColor;
-   })
 })
