@@ -49,18 +49,34 @@ function openWindow (e) {
    newWindow.addEventListener("pointermove", (e) => {
       if(!isDragging) return;
 
-      const newX = e.clientX - xOffset;
-      const newY = e.clientY - yOffset;
+      let newX = e.clientX - xOffset;
+      let newY = e.clientY - yOffset;
 
-      // update the reference for next initiation
-      // of dragging
-      currentX = newX;
-      currentY = newY;
+      // horizontal bounding logic
+      if(newX < 0) {
+         newX = 0;
+      }
+      else if (newX > window.innerWidth-newWindow.getBoundingClientRect().width) {
+         newX = window.innerWidth-newWindow.getBoundingClientRect().width;
+      }
+
+      // vertical bounding logic
+      if(newY < 0) {
+         newY = 0;
+      }
+      else if (newY > window.innerHeight-newWindow.getBoundingClientRect().height) {
+         newY = window.innerHeight-newWindow.getBoundingClientRect().height;
+      }
 
       // using left and top properties
       // newWindow.style.left = `${newX}px`;
       // newWindow.style.top = `${newY}px`;
 
-      newWindow.style.transform = `translate3d(${newX}px, ${newY}px, 0)`
+      newWindow.style.transform = `translate3d(${newX}px, ${newY}px, 0)`;
+
+      // update the reference for next initiation
+      // of dragging
+      currentX = newX;
+      currentY = newY;
    })
 }
