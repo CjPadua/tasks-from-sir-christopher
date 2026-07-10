@@ -50,8 +50,27 @@ function openWindow (e) {
 
    const windowBody = document.createElement("div");
    windowBody.classList.add("window-body");
-
    newWindow.appendChild(windowBody);
+
+   const rightSideResize = document.createElement("div");
+   rightSideResize.classList.add("resizer", "right-resize");
+   newWindow.appendChild(rightSideResize);
+
+   const leftSideResize = document.createElement("div");
+   leftSideResize.classList.add("resizer", "left-resize");
+   newWindow.appendChild(leftSideResize);
+
+   const bottomSideResize = document.createElement("div");
+   bottomSideResize.classList.add("resizer", "bottom-resize");
+   newWindow.appendChild(bottomSideResize);
+
+   const bottomRightResize = document.createElement("div");
+   bottomRightResize.classList.add("resizer", "bottom-right-resize");
+   newWindow.appendChild(bottomRightResize);
+
+   const bottomLeftResize = document.createElement("div");
+   bottomLeftResize.classList.add("resizer", "bottom-left-resize");
+   newWindow.appendChild(bottomLeftResize);
 
    document.body.appendChild(newWindow);
 
@@ -124,7 +143,129 @@ function openWindow (e) {
       currentY = newY;
    })
 
+   let xResizeStart, yResizeStart;
+
+   rightSideResize.addEventListener("pointerdown", (e) => {
+      isDragging = true;
+      xResizeStart = e.clientX;
+      rightSideResize.setPointerCapture(e.pointerId);
+   })
+
+   rightSideResize.addEventListener("pointerup", (e) => {
+      isDragging = false;
+      rightSideResize.releasePointerCapture(e.pointerId);
+   })
+
+   rightSideResize.addEventListener("pointermove", (e) => {
+      if(!isDragging) return;
+
+      let xOffset = e.clientX - xResizeStart;
+      xResizeStart = e.clientX;
+
+      newWindow.style.width = `${newWindow.offsetWidth + xOffset}px`;
+   })
+
+   leftSideResize.addEventListener("pointerdown", (e) => {
+      isDragging = true;
+      xResizeStart = e.clientX;
+      xOffset = e.clientX - currentX;
+      
+      leftSideResize.setPointerCapture(e.pointerId);
+   })
+
+   leftSideResize.addEventListener("pointerup", (e) => {
+      isDragging = false;
+      leftSideResize.releasePointerCapture(e.pointerId);
+   })
+
+   leftSideResize.addEventListener("pointermove", (e) => {
+      if(!isDragging) return;
+
+      let xToAdd = e.clientX - xResizeStart;
+      xResizeStart = e.clientX;
+      currentX = e.clientX - xOffset;
+
+      newWindow.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+      newWindow.style.width = `${newWindow.offsetWidth - xToAdd}px`;
+   })
+
+   bottomLeftResize.addEventListener("pointerdown", (e) => {
+      isDragging = true;
+      xResizeStart = e.clientX;
+      xOffset = e.clientX - currentX;
+
+      yResizeStart = e.clientY;
+      
+      bottomLeftResize.setPointerCapture(e.pointerId);
+   })
+
+   bottomLeftResize.addEventListener("pointerup", (e) => {
+      isDragging = false;
+      bottomLeftResize.releasePointerCapture(e.pointerId);
+   })
+
+   bottomLeftResize.addEventListener("pointermove", (e) => {
+      if(!isDragging) return;
+
+      let xToAdd = e.clientX - xResizeStart;
+      xResizeStart = e.clientX;
+      let yToAdd = e.clientY - yResizeStart;
+      yResizeStart = e.clientY;
+
+      currentX = e.clientX - xOffset;
+
+      newWindow.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+      newWindow.style.width = `${newWindow.offsetWidth - xToAdd}px`;
+      newWindow.style.height = `${newWindow.offsetHeight + yToAdd}px`;
+   })
+
+   bottomSideResize.addEventListener("pointerdown", (e) => {
+      isDragging = true;
+      yResizeStart = e.clientY;
+      bottomSideResize.setPointerCapture(e.pointerId);
+   })
+
+   bottomSideResize.addEventListener("pointerup", (e) => {
+      isDragging = false;
+      bottomSideResize.releasePointerCapture(e.pointerId);
+   })
+
+   bottomSideResize.addEventListener("pointermove", (e) => {
+      if(!isDragging) return;
+
+      let yOffset = e.clientY - yResizeStart;
+      yResizeStart = e.clientY;
+
+      newWindow.style.height = `${newWindow.offsetHeight + yOffset}px`;
+   })
+
+   bottomRightResize.addEventListener("pointerdown", (e) => {
+      isDragging = true;
+      xResizeStart = e.clientX;
+      yResizeStart = e.clientY;
+      bottomRightResize.setPointerCapture(e.pointerId);
+   })
+
+   bottomRightResize.addEventListener("pointerup", (e) => {
+      isDragging = false;
+      bottomRightResize.releasePointerCapture(e.pointerId);
+   })
+
+   bottomRightResize.addEventListener("pointermove", (e) => {
+      if(!isDragging) return;
+
+      let xOffset = e.clientX - xResizeStart;
+      xResizeStart = e.clientX;
+
+      let yOffset = e.clientY - yResizeStart;
+      yResizeStart = e.clientY;
+
+      newWindow.style.width = `${newWindow.offsetWidth + xOffset}px`;
+      newWindow.style.height = `${newWindow.offsetHeight + yOffset}px`;
+   })
+   
    closeScreenButton.addEventListener("click", () => {
       newWindow.remove();
    })
+
 }
