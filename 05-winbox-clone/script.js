@@ -1,4 +1,6 @@
 const openWindowBtn = document.getElementById("open-window-btn");
+const mainContainer = document.getElementById("main");
+
 let globalZIndex = 10;
 
 openWindowBtn.addEventListener("click", openWindow)
@@ -17,18 +19,18 @@ function openWindow (e) {
    headerTitle.textContent = e.currentTarget.value;
    header.appendChild(headerTitle);
 
-   const minimizeButton = document.createElement("button");
-   minimizeButton.innerHTML = `__
+   const hideButton = document.createElement("button");
+   hideButton.innerHTML = `__
    `;
-   header.appendChild(minimizeButton);
+   header.appendChild(hideButton);
    
-   const maximizeButton = document.createElement("button");
-   maximizeButton.innerHTML = `
+   const maxMinButton = document.createElement("button");
+   maxMinButton.innerHTML = `
 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-square" viewBox="0 0 16 16">
   <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/>
 </svg>
    `;
-   header.appendChild(maximizeButton);
+   header.appendChild(maxMinButton);
 
    const fullScreenButton = document.createElement("button");
    fullScreenButton.innerHTML = `
@@ -84,7 +86,7 @@ function openWindow (e) {
    bottomLeftResize.classList.add("resizer", "bottom-left-resize");
    newWindow.appendChild(bottomLeftResize);
 
-   document.body.appendChild(newWindow);
+   main.appendChild(newWindow);
 
    let currentX = Math.random() * 100 + 50;
    let currentY = Math.random() * 100 + 50;
@@ -103,22 +105,22 @@ function openWindow (e) {
       newWindow.style.transform = `translate3d(${lastValidX}px, ${lastValidY}px, 0)`;
       currentX = lastValidX;
       currentY = lastValidY;
+
+      setTimeout(() => {
+         newWindow.style.transition = "";
+      }, 500)
    }
 
    let isDragging = false;
    let xOffset, yOffset, lastValidX, lastValidY;
 
    headerTitle.addEventListener("pointerdown", (e) => {
+      if(isMaximized) return;
       newWindow.style.zIndex = ++globalZIndex;
       isDragging = true;
 
       xOffset = e.clientX - currentX;
       yOffset = e.clientY - currentY;
-
-      // remove transition for transform
-      if(newWindow.style.transition) {
-         newWindow.style.transition = "";
-      }
 
       // lock the cursor event to the window
       // prevents loss of control of the window
@@ -379,6 +381,40 @@ function openWindow (e) {
 
       newWindow.style.width = `${newWindow.offsetWidth + xOffset}px`;
       newWindow.style.height = `${newWindow.offsetHeight + yOffset}px`;
+   })
+
+   let currentWidth, currentHeight;
+   let isMaximized = false;
+
+   function toggleMaxMinWindow() {
+      if(isMaximized) {
+         newWindow.style.position = "absolute";
+         newWindow.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+         newWindow.style.width = `${currentWidth}px`;
+         newWindow.style.height = `${currentHeight}px`;
+         newWindow.style.borderRadius = "1em";
+
+         isMaximized = false;
+         return;
+      }
+
+      currentHeight = newWindow.offsetHeight;
+      currentWidth = newWindow.offsetWidth;
+
+      newWindow.style.position = "relative";
+      newWindow.style.transform = `translate3d(0px, 0px, 0)`;
+      newWindow.style.width = "100%";
+      // newWindow.style.height = "100%";
+      newWindow.style.borderRadius = "0px";
+      mainContainer.scrollIntoView();
+
+      isMaximized = true;
+   }
+
+   maxMinButton.addEventListener("click", toggleMaxMinWindow)
+
+   fullScreenButton.addEventListener("click", () => {
+      windowBody.requestFullscreen();
    })
    
    closeScreenButton.addEventListener("click", () => {
