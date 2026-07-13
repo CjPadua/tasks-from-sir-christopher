@@ -68,6 +68,10 @@ function openWindow (e) {
    topSideResize.classList.add("resizer", "top-resize");
    newWindow.appendChild(topSideResize);
 
+   const topRightResize = document.createElement("div");
+   topRightResize.classList.add("resizer", "top-right-resize");
+   newWindow.appendChild(topRightResize);
+
    const bottomRightResize = document.createElement("div");
    bottomRightResize.classList.add("resizer", "bottom-right-resize");
    newWindow.appendChild(bottomRightResize);
@@ -283,6 +287,37 @@ function openWindow (e) {
 
       newWindow.style.height = `${newWindow.offsetHeight - yToAdd}px`;
       newWindow.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+   })
+
+   topRightResize.addEventListener("pointerdown", (e) => {
+      isDragging = true;
+      xResizeStart = e.clientX;
+      yResizeStart = e.clientY;
+
+      yOffset = e.clientY - currentY;
+
+      topRightResize.setPointerCapture(e.pointerId);
+   })
+
+   topRightResize.addEventListener("pointerup", (e) => {
+      isDragging = false;
+      topRightResize.releasePointerCapture(e.pointerId);
+   })
+
+   topRightResize.addEventListener("pointermove", (e) => {
+      if(!isDragging) return;
+
+      let xToAdd = e.clientX - xResizeStart;
+      xResizeStart = e.clientX;
+
+      let yToAdd = e.clientY - yResizeStart;
+      yResizeStart = e.clientY;
+
+      currentY = e.clientY - yOffset;
+
+      newWindow.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+      newWindow.style.width = `${newWindow.offsetWidth + xToAdd}px`;
+      newWindow.style.height = `${newWindow.offsetHeight - yToAdd}px`;
    })
 
    bottomRightResize.addEventListener("pointerdown", (e) => {

@@ -92,6 +92,15 @@ body {
    z-index: 2;
 }
 
+.top-right-resize {
+   right: 0;
+   top: 0;
+   height: 1em;
+   width: 1em;
+   z-index: 5;
+   cursor: ne-resize;
+}
+
 .bottom-right-resize {
    right: 0;
    bottom: 0;
