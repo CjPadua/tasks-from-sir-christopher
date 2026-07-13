@@ -110,6 +110,15 @@ body {
    cursor: se-resize;
 }
 
+.top-left-resize {
+   left: 0;
+   top: 0;
+   height: 1em;
+   width: 1em;
+   z-index: 10;
+   cursor: nw-resize;
+}
+
 .bottom-left-resize {
    left: 0;
    bottom: 0;
