@@ -64,6 +64,10 @@ function openWindow (e) {
    bottomSideResize.classList.add("resizer", "bottom-resize");
    newWindow.appendChild(bottomSideResize);
 
+   const topSideResize = document.createElement("div");
+   topSideResize.classList.add("resizer", "top-resize");
+   newWindow.appendChild(topSideResize);
+
    const bottomRightResize = document.createElement("div");
    bottomRightResize.classList.add("resizer", "bottom-right-resize");
    newWindow.appendChild(bottomRightResize);
@@ -86,8 +90,15 @@ function openWindow (e) {
 
    newWindow.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
 
+   function bringBackToViewport(lastValidX, lastValidY) {
+      newWindow.style.transition = "transform 0.5s ease-out";
+      newWindow.style.transform = `translate3d(${lastValidX}px, ${lastValidY}px, 0)`;
+      currentX = lastValidX;
+      currentY = lastValidY;
+   }
+
    let isDragging = false;
-   let xOffset, yOffset;
+   let xOffset, yOffset, lastValidX, lastValidY;
 
    headerTitle.addEventListener("pointerdown", (e) => {
       newWindow.style.zIndex = ++globalZIndex;
@@ -96,6 +107,11 @@ function openWindow (e) {
       xOffset = e.clientX - currentX;
       yOffset = e.clientY - currentY;
 
+      // remove transition for transform
+      if(newWindow.style.transition) {
+         newWindow.style.transition = "";
+      }
+
       // lock the cursor event to the window
       // prevents loss of control of the window
       headerTitle.setPointerCapture(e.pointerId);
@@ -103,6 +119,16 @@ function openWindow (e) {
 
    headerTitle.addEventListener("pointerup", (e) => {
       isDragging = false;
+
+      // check if either x or y coordinates are out of bounds
+      //  and bring them back in
+      if(currentX < 0 || 
+         currentX > window.innerWidth-newWindow.getBoundingClientRect().width ||
+         currentY < 0 ||
+         currentY > window.innerHeight-newWindow.getBoundingClientRect().height
+      ) {
+         bringBackToViewport(lastValidX, lastValidY);
+      }
 
       // releases the cursor event since the dragging
       // is now done
@@ -115,22 +141,6 @@ function openWindow (e) {
       let newX = e.clientX - xOffset;
       let newY = e.clientY - yOffset;
 
-      // horizontal bounding logic
-      if(newX < 0) {
-         newX = 0;
-      }
-      else if (newX > window.innerWidth-newWindow.getBoundingClientRect().width) {
-         newX = window.innerWidth-newWindow.getBoundingClientRect().width;
-      }
-
-      // vertical bounding logic
-      if(newY < 0) {
-         newY = 0;
-      }
-      else if (newY > window.innerHeight-newWindow.getBoundingClientRect().height) {
-         newY = window.innerHeight-newWindow.getBoundingClientRect().height;
-      }
-
       // using left and top properties
       // newWindow.style.left = `${newX}px`;
       // newWindow.style.top = `${newY}px`;
@@ -141,6 +151,18 @@ function openWindow (e) {
       // of dragging
       currentX = newX;
       currentY = newY;
+
+      // horizontal bounding logic
+      if(newX > 0 && 
+         newX < window.innerWidth-newWindow.getBoundingClientRect().width) {
+         lastValidX = currentX;
+      }
+
+      // vertical bounding logic
+      if(newY > 0 && 
+         newY < window.innerHeight-newWindow.getBoundingClientRect().height) {
+         lastValidY = currentY;
+      }
    })
 
    let xResizeStart, yResizeStart;
@@ -230,13 +252,37 @@ function openWindow (e) {
       bottomSideResize.releasePointerCapture(e.pointerId);
    })
 
-   bottomSideResize.addEventListener("pointermove", (e) => {
+   bottomSideResize.addEventListener("mousemove", (e) => {
       if(!isDragging) return;
 
       let yOffset = e.clientY - yResizeStart;
       yResizeStart = e.clientY;
 
       newWindow.style.height = `${newWindow.offsetHeight + yOffset}px`;
+   })
+
+   topSideResize.addEventListener("pointerdown", (e) => {
+      isDragging = true;
+      yResizeStart = e.clientY;
+      yOffset = e.clientY - currentY;
+
+      topSideResize.setPointerCapture(e.pointerId);
+   })
+
+   topSideResize.addEventListener("pointerup", (e) => {
+      isDragging = false;
+      topSideResize.releasePointerCapture(e.pointerId);
+   })
+
+   topSideResize.addEventListener("mousemove", (e) => {
+      if(!isDragging) return;
+
+      let yToAdd = e.clientY - yResizeStart;
+      yResizeStart = e.clientY;
+      currentY = e.clientY - yOffset;
+
+      newWindow.style.height = `${newWindow.offsetHeight - yToAdd}px`;
+      newWindow.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
    })
 
    bottomRightResize.addEventListener("pointerdown", (e) => {
