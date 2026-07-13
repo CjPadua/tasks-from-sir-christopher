@@ -1,11 +1,12 @@
 const openWindowBtn = document.getElementById("open-window-btn");
 const mainContainer = document.getElementById("main");
+const tabContainer = document.getElementById("tab-bar");
 
 let globalZIndex = 10;
 
-openWindowBtn.addEventListener("click", openWindow)
+openWindowBtn.addEventListener("click", createCustomWindow)
 
-function openWindow (e) {
+function createCustomWindow (e) {
    const newWindow = document.createElement("div");
    newWindow.classList.add("custom-window");
    newWindow.style.zIndex = ++globalZIndex;
@@ -164,7 +165,7 @@ function openWindow (e) {
 
       // horizontal bounding logic
       if(newX > 0 && 
-         newX < window.innerWidth-newWindow.getBoundingClientRect().width) {
+         newX < window.innerWidth-newWindow.offsetWidth) {
          lastValidX = currentX;
       }
 
@@ -185,6 +186,16 @@ function openWindow (e) {
 
    rightSideResize.addEventListener("pointerup", (e) => {
       isDragging = false;
+
+      if(e.clientX >= window.innerWidth) {
+         newWindow.style.transition = "all 0.5s";
+         newWindow.style.width = `${window.innerWidth - currentX}px`;
+
+         setTimeout(() => {
+            newWindow.style.transition = "";
+         }, 500)
+      }
+
       rightSideResize.releasePointerCapture(e.pointerId);
    })
 
@@ -207,6 +218,19 @@ function openWindow (e) {
 
    leftSideResize.addEventListener("pointerup", (e) => {
       isDragging = false;
+
+      if(currentX < 0) {
+         newWindow.style.transition = "all 0.5s";
+         currentX = 0;
+         newWindow.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+         // newWindow.style.width = `${newWindow.offsetWidth + e.clientX - xOffset}px`;
+
+         setTimeout(() => {
+            newWindow.style.transition = "";
+         }, 500)
+      }
+      
+
       leftSideResize.releasePointerCapture(e.pointerId);
    })
 
@@ -291,6 +315,16 @@ function openWindow (e) {
 
    bottomSideResize.addEventListener("pointerup", (e) => {
       isDragging = false;
+
+      if(e.clientY > window.innerHeight) {
+         newWindow.style.transition = "all 0.5s";
+         newWindow.style.height = `${window.innerHeight - currentY}px`;
+
+         setTimeout(() => {
+            newWindow.style.transition = "";
+         }, 500)
+      }
+
       bottomSideResize.releasePointerCapture(e.pointerId);
    })
 
@@ -313,6 +347,18 @@ function openWindow (e) {
 
    topSideResize.addEventListener("pointerup", (e) => {
       isDragging = false;
+
+      if(e.clientY < 0) {
+         newWindow.style.transition = "all 0.5s";
+         newWindow.style.height = `${newWindow.offsetHeight + currentY}px`;
+         currentY = 0;
+         newWindow.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+
+         setTimeout(() => {
+            newWindow.style.transition = "";
+         }, 500)
+      }
+
       topSideResize.releasePointerCapture(e.pointerId);
    })
 
@@ -397,6 +443,9 @@ function openWindow (e) {
          newWindow.style.width = `${currentWidth}px`;
          newWindow.style.height = `${currentHeight}px`;
          newWindow.style.borderRadius = "1em";
+         newWindow.style.padding = "0.5em";
+         windowBody.style.borderRadius = "0.5em";
+         header.style.padding = "0";
 
          isMaximized = false;
          return;
@@ -418,7 +467,10 @@ function openWindow (e) {
       newWindow.style.width = "100%";
       // newWindow.style.height = "100%";
       newWindow.style.borderRadius = "0px";
-      mainContainer.scrollIntoView();
+      newWindow.style.padding = "0.5em 0 0 0";
+      windowBody.style.borderRadius = "0";
+      header.style.padding = "0 0.5em 0 0.5em";
+
 
       isMaximized = true;
    }
@@ -433,4 +485,76 @@ function openWindow (e) {
       newWindow.remove();
    })
 
+   hideButton.addEventListener("click", () => {
+      newWindow.style.display = "none";
+      displayWindowTab();
+
+      if(isMaximized) toggleMaxMinWindow();
+   });
+
+   function displayWindowTab() {
+      const tab = document.createElement("div");
+      tab.classList.add("window-tab");
+      tab.style.backgroundColor = newWindow.style.backgroundColor;
+
+      const tabTitle = document.createElement("p");
+      tabTitle.textContent = "Window 1";
+      tab.appendChild(tabTitle);
+
+      const tabMaxBtn = document.createElement("button");
+      tabMaxBtn.innerHTML = `
+   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-square" viewBox="0 0 16 16">
+   <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/>
+   </svg>
+      `;
+      tab.appendChild(tabMaxBtn);
+
+      const tabCloseBtn = document.createElement("button");
+      tabCloseBtn.innerHTML = `
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+  <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+</svg>
+      `;
+      tab.appendChild(tabCloseBtn);
+
+      tabContainer.appendChild(tab);
+      
+      tabCloseBtn.addEventListener("click", () => {
+         newWindow.remove();
+         tab.remove();
+      })
+
+      tabTitle.addEventListener("click", () => {
+         newWindow.style.display = "flex";
+         tab.remove();
+      })
+
+      tabMaxBtn.addEventListener("click", () => {
+         newWindow.style.display = "flex";
+         tab.remove();
+         document.body.removeChild(newWindow);
+         if(mainContainer.childElementCount) {
+            mainContainer.insertBefore(newWindow, mainContainer.firstChild)
+         }
+         else {
+            mainContainer.appendChild(newWindow);
+         }
+
+         currentHeight = newWindow.offsetHeight;
+         currentWidth = newWindow.offsetWidth;
+
+         newWindow.style.position = "relative";
+         newWindow.style.transform = `translate3d(0px, 0px, 0)`;
+         newWindow.style.width = "100%";
+         // newWindow.style.height = "100%";
+         newWindow.style.borderRadius = "0px";
+         newWindow.style.padding = "0.5em 0 0 0";
+         windowBody.style.borderRadius = "0";
+         header.style.padding = "0 0.5em 0 0.5em";
+
+         isMaximized = true;
+      });
+   }
+
 }
+

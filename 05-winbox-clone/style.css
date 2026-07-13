@@ -46,6 +46,7 @@ body {
    font-weight: bold;
    flex-grow: 1;
    font-size: 1.25em;
+   cursor: move;
 }
 
 .window-header > button {
@@ -57,7 +58,8 @@ body {
    z-index: 10;
 }
 
-.window-header > button:hover {
+.window-header > button:hover,
+.window-tab > button:hover {
    cursor: pointer;
 }
 
@@ -134,4 +136,36 @@ body {
    width: 1em;
    z-index: 10;
    cursor: sw-resize;
+}
+
+.window-tab {
+   display: flex;
+   width: 10em;
+   padding: 0.5em;
+   border-radius: 1em 1em 0 0;
+   gap: 0.25em;
+   border: 2px outset black;
+   border-bottom: 0;
+   user-select: none;
+   cursor: pointer;
+}
+
+.window-tab > button {
+   background-color: transparent;
+   border: 0;
+   margin: 0;
+   padding: 0;
+   display: flex;
+   align-items: center;
+}
+
+.window-tab > p {
+   flex-grow: 1;
+   font-weight: bold;
+}
+
+.tab-bar {
+   display: flex;
+   position: absolute;
+   bottom: 0;
 }
