@@ -86,7 +86,7 @@ function openWindow (e) {
    bottomLeftResize.classList.add("resizer", "bottom-left-resize");
    newWindow.appendChild(bottomLeftResize);
 
-   main.appendChild(newWindow);
+   document.body.appendChild(newWindow);
 
    let currentX = Math.random() * 100 + 50;
    let currentY = Math.random() * 100 + 50;
@@ -387,7 +387,11 @@ function openWindow (e) {
    let isMaximized = false;
 
    function toggleMaxMinWindow() {
+      newWindow.style.zIndex = ++globalZIndex;
+
       if(isMaximized) {
+         mainContainer.removeChild(newWindow);
+         document.body.appendChild(newWindow);
          newWindow.style.position = "absolute";
          newWindow.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
          newWindow.style.width = `${currentWidth}px`;
@@ -396,6 +400,14 @@ function openWindow (e) {
 
          isMaximized = false;
          return;
+      }
+
+      document.body.removeChild(newWindow);
+      if(mainContainer.childElementCount) {
+         mainContainer.insertBefore(newWindow, mainContainer.firstChild)
+      }
+      else {
+         mainContainer.appendChild(newWindow);
       }
 
       currentHeight = newWindow.offsetHeight;

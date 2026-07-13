@@ -14,7 +14,7 @@ body {
 
 .main {
    display: flex;
-   flex-direction: column-reverse;
+   flex-direction: column;
    flex-grow: 1;
    overflow: hidden;
 }
