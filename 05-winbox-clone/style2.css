@@ -1,0 +1,70 @@
+* {
+   box-sizing: border-box;
+   margin: 0;
+   /* border: 1px solid black; */
+   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+   padding: 0;
+}
+
+body,
+.main,
+.winbox {
+   display: flex;
+   flex-direction: column;
+   overflow: hidden;
+}
+
+body {
+   height: 100vh;
+}
+
+.main {
+   flex-grow: 1;
+}
+
+.winbox {
+   border: 2px outset black;
+   height: 200px;
+   width: 300px;
+   position: absolute;
+   left: 100px;
+   top: 100px;
+   border-radius: 1em;
+   padding: 0.5em;
+   gap: 0.5em;
+   flex: 1 0 100%;
+}
+
+.winbox-header {
+   display: flex;
+   align-items: center;
+   gap: 0.5em;
+   user-select: none;
+}
+
+.winbox-header-title {
+   flex-grow: 1;
+   font-weight: bold;
+   font-size: 1.25em;
+   cursor: move;
+}
+
+.winbox-header > button {
+   display: flex;
+   font-size: 1em;
+   font-weight: bold; 
+   background-color: transparent;
+   border: 0;
+   z-index: 2;
+}
+
+.winbox-header > button:hover {
+   cursor: pointer;
+}
+
+.winbox-body {
+   flex-grow: 1;
+   background-color: black;
+   overflow: hidden;
+   border-radius: 0.5em;
+}
