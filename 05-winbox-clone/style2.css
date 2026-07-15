@@ -27,8 +27,8 @@ body {
    height: 200px;
    width: 300px;
    position: absolute;
-   left: 100px;
-   top: 100px;
+   left: 0px;
+   top: 0px;
    border-radius: 1em;
    padding: 0.5em;
    gap: 0.5em;
@@ -64,7 +64,7 @@ body {
 
 .winbox-body {
    flex-grow: 1;
-   background-color: black;
+   background-color: white;
    overflow: hidden;
    border-radius: 0.5em;
 }
