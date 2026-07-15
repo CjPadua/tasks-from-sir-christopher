@@ -145,6 +145,32 @@ function winboxDrag(e) {
    winbox.style.transform = `translate3d(${newX}px, ${newY}px, 0)`;
 }
 
+function addEventListenerToHeaderTitle(winbox, winboxNumber) {
+   const headerTitle = winbox.querySelector(`#winbox-${winboxNumber}-header-title`);
+
+   headerTitle.addEventListener("pointerdown", winboxDragStart);
+   headerTitle.addEventListener("pointerup", winboxDragEnd);
+   headerTitle.addEventListener("pointermove", winboxDrag);
+}
+
+function addEventListenerToCloseBtn(winbox, winboxNumber) {
+   const closeBtn = winbox.querySelector(`#winbox-${winboxNumber}-close-btn`);
+
+   closeBtn.addEventListener("click", () => {
+      winbox.remove();
+   })
+}
+
+function addEventListenerToFullScreenBtn(winbox, winboxNumber) {
+   const fullScreenBtn = winbox.querySelector(`#winbox-${winboxNumber}-full-screen-btn`);
+
+   const winboxBody = winbox.querySelector(`#winbox-${winboxNumber}-body`)
+
+   fullScreenBtn.addEventListener("click", () => {
+      winboxBody.requestFullscreen();
+   })
+}
+
 function createWinbox() {
    const winboxNumber = ++winboxCount;
 
@@ -195,17 +221,9 @@ function createWinbox() {
 
    winbox.style.transform = `translate3d(${randomX}px, ${randomY}px, 0)`;
 
-   const headerTitle = winbox.querySelector(`#winbox-${winboxNumber}-header-title`);
-
-   let isDragging = false;
-   let xOffset, yOffset, lastValidX, lastValidY;
-
-   headerTitle.addEventListener("pointerdown", winboxDragStart);
-
-   headerTitle.addEventListener("pointerup", winboxDragEnd);
-
-   headerTitle.addEventListener("pointermove", winboxDrag);
-
+   addEventListenerToHeaderTitle(winbox, winboxNumber);
+   addEventListenerToCloseBtn(winbox, winboxNumber);
+   addEventListenerToFullScreenBtn(winbox, winboxNumber);
 }
 
 createWinboxBtn.addEventListener("click", createWinbox);
