@@ -5,18 +5,45 @@ const tabContainer = document.getElementById("tab-bar");
 let globalZIndex = 10;
 let winboxCount = 0;
 
+function handleWinboxPointerDown(e) {
+   const winboxHeaderTitle = e.currentTarget;
+
+   const winboxId = winboxHeaderTitle.getAttribute("winbox-id")
+   const winbox = document.getElementById(winboxId);
+   
+   const isMaximized = winbox.getAttribute("is-maximized");
+   if(isMaximized === "true") return;
+
+   winbox.setAttribute("is-dragging", "true");
+   
+   const currentX = winbox.getBoundingClientRect().x;
+   const currentY = winbox.getBoundingClientRect().y;
+
+   const xOffset = e.clientX - currentX;
+   const yOffset = e.clientY - currentY;
+
+   winbox.setAttribute("x-offset", `${xOffset}`);
+   winbox.setAttribute("y-offset", `${yOffset}`);
+
+   winboxHeaderTitle.setPointerCapture(e.pointerId);
+}
+
 function createWinbox() {
    const winboxNumber = ++winboxCount;
 
    const winbox = document.createElement("div");
    winbox.setAttribute("id", `winbox-${winboxCount}`);
+
+   winbox.setAttribute("is-dragging", "false");
+   winbox.setAttribute("is-maximized", "false");
+   
    winbox.classList.add("winbox");
    winbox.style.zIndex = ++globalZIndex;
    winbox.style.backgroundColor = `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`
 
    winbox.innerHTML = `
       <div id="winbox-${winboxNumber}-header" class="winbox-header">
-         <p id="winbox-${winboxNumber}-header-title" class="winbox-header-title">Window ${winboxNumber}</p>
+         <p id="winbox-${winboxNumber}-header-title" class="winbox-header-title" winbox-id="winbox-${winboxNumber}">Window ${winboxNumber}</p>
          <button id="winbox-${winboxNumber}-hide-button">__</button>
          <button id="winbox-${winboxNumber}-min-max-btn" class="min-man-btn">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-square" viewBox="0 0 16 16">
@@ -49,10 +76,18 @@ function createWinbox() {
 
    document.body.appendChild(winbox);
 
-   let currentX = Math.random() * 100 + 50;
-   let currentY = Math.random() * 100 + 50;
+   let randomX = Math.random() * 100 + 50;
+   let randomY = Math.random() * 100 + 50;
 
-   winbox.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+   winbox.style.transform = `translate3d(${randomX}px, ${randomY}px, 0)`;
+
+   const headerTitle = winbox.querySelector(`#winbox-${winboxNumber}-header-title`);
+
+   let isDragging = false;
+   let xOffset, yOffset, lastValidX, lastValidY;
+
+   headerTitle.addEventListener("pointerdown", handleWinboxPointerDown);
+
 }
 
 createWinboxBtn.addEventListener("click", createWinbox);
