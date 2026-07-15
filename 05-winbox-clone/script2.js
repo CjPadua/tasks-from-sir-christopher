@@ -5,19 +5,61 @@ const tabContainer = document.getElementById("tab-bar");
 let globalZIndex = 10;
 let winboxCount = 0;
 
-function handleWinboxPointerDown(e) {
-   const winboxHeaderTitle = e.currentTarget;
+function getWinboxInfoFromEvent(event) {
+   const winboxHeaderTitle = event.currentTarget;
 
-   const winboxId = winboxHeaderTitle.getAttribute("winbox-id")
+   const winboxId = winboxHeaderTitle.getAttribute("winbox-id");
    const winbox = document.getElementById(winboxId);
-   
-   const isMaximized = winbox.getAttribute("is-maximized");
-   if(isMaximized === "true") return;
 
-   winbox.setAttribute("is-dragging", "true");
-   
+   const isDragging = winbox.getAttribute("is-dragging");
+   const isMaximized = winbox.getAttribute("is-maximized");
+   const xOffset = winbox.getAttribute("x-offset");
+   const yOffset = winbox.getAttribute("y-offset");
+
    const currentX = winbox.getBoundingClientRect().x;
    const currentY = winbox.getBoundingClientRect().y;
+
+   return {
+      winboxHeaderTitle, 
+      winboxId, 
+      winbox, 
+      isMaximized, 
+      currentX, 
+      currentY, 
+      isDragging, 
+      isMaximized, 
+      xOffset, 
+      yOffset
+   };
+}
+
+function handleWinboxPointerUp(e) {
+   const {
+      winboxHeaderTitle, 
+      winbox, 
+      currentX, 
+      currentY
+   } = getWinboxInfoFromEvent(e);
+
+   // TODO Implement animated bounds checking
+
+   winbox.setAttribute("is-dragging", "false");
+   winboxHeaderTitle.releasePointerCapture(e.pointerId);
+}
+
+function handleWinboxPointerDown(e) {
+   const {
+      winboxHeaderTitle, 
+      winbox, 
+      isMaximized, 
+      currentX, 
+      currentY
+   } = getWinboxInfoFromEvent(e);
+
+   if(isMaximized === "true") return;
+
+   winbox.style.zIndex = ++globalZIndex;
+   winbox.setAttribute("is-dragging", "true");
 
    const xOffset = e.clientX - currentX;
    const yOffset = e.clientY - currentY;
@@ -33,9 +75,6 @@ function createWinbox() {
 
    const winbox = document.createElement("div");
    winbox.setAttribute("id", `winbox-${winboxCount}`);
-
-   winbox.setAttribute("is-dragging", "false");
-   winbox.setAttribute("is-maximized", "false");
    
    winbox.classList.add("winbox");
    winbox.style.zIndex = ++globalZIndex;
@@ -43,7 +82,7 @@ function createWinbox() {
 
    winbox.innerHTML = `
       <div id="winbox-${winboxNumber}-header" class="winbox-header">
-         <p id="winbox-${winboxNumber}-header-title" class="winbox-header-title" winbox-id="winbox-${winboxNumber}">Window ${winboxNumber}</p>
+         <p id="winbox-${winboxNumber}-header-title" class="winbox-header-title" winbox-id="winbox-${winboxNumber}" is-dragging="false" is-maximized="false" x-offset="0" y-offset="0">Winbox ${winboxNumber}</p>
          <button id="winbox-${winboxNumber}-hide-button">__</button>
          <button id="winbox-${winboxNumber}-min-max-btn" class="min-man-btn">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-square" viewBox="0 0 16 16">
@@ -87,6 +126,8 @@ function createWinbox() {
    let xOffset, yOffset, lastValidX, lastValidY;
 
    headerTitle.addEventListener("pointerdown", handleWinboxPointerDown);
+
+   headerTitle.addEventListener("pointerup", handleWinboxPointerUp);
 
 }
 
