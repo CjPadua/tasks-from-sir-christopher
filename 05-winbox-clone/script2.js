@@ -5,19 +5,22 @@ const tabContainer = document.getElementById("tab-bar");
 let globalZIndex = 10;
 let winboxCount = 0;
 
-function getWinboxInfoFromEvent(event) {
+function getWinboxInfo(event) {
    const winboxHeaderTitle = event.currentTarget;
 
    const winboxId = winboxHeaderTitle.getAttribute("winbox-id");
    const winbox = document.getElementById(winboxId);
 
-   const isDragging = winbox.getAttribute("is-dragging");
-   const isMaximized = winbox.getAttribute("is-maximized");
-   const xOffset = winbox.getAttribute("x-offset");
-   const yOffset = winbox.getAttribute("y-offset");
+   const isDragging = winbox.getAttribute("is-dragging") === "true";
+   const isMaximized = winbox.getAttribute("is-maximized") === "true";
+   const xOffset = Number(winbox.getAttribute("x-offset"));
+   const yOffset = Number(winbox.getAttribute("y-offset"));
 
-   const currentX = winbox.getBoundingClientRect().x;
-   const currentY = winbox.getBoundingClientRect().y;
+   const currentX = Number(winbox.getBoundingClientRect().x);
+   const currentY = Number(winbox.getBoundingClientRect().y);
+
+   const maxX = window.innerWidth - winbox.offsetWidth;
+   const maxY = window.innerHeight - winbox.offsetHeight;
 
    return {
       winboxHeaderTitle, 
@@ -29,34 +32,22 @@ function getWinboxInfoFromEvent(event) {
       isDragging, 
       isMaximized, 
       xOffset, 
-      yOffset
+      yOffset,
+      maxX,
+      maxY
    };
 }
 
-function handleWinboxPointerUp(e) {
-   const {
-      winboxHeaderTitle, 
-      winbox, 
-      currentX, 
-      currentY
-   } = getWinboxInfoFromEvent(e);
-
-   // TODO Implement animated bounds checking
-
-   winbox.setAttribute("is-dragging", "false");
-   winboxHeaderTitle.releasePointerCapture(e.pointerId);
-}
-
-function handleWinboxPointerDown(e) {
+function winboxDragStart(e) {
    const {
       winboxHeaderTitle, 
       winbox, 
       isMaximized, 
       currentX, 
       currentY
-   } = getWinboxInfoFromEvent(e);
+   } = getWinboxInfo(e);
 
-   if(isMaximized === "true") return;
+   if(isMaximized) return;
 
    winbox.style.zIndex = ++globalZIndex;
    winbox.setAttribute("is-dragging", "true");
@@ -68,6 +59,90 @@ function handleWinboxPointerDown(e) {
    winbox.setAttribute("y-offset", `${yOffset}`);
 
    winboxHeaderTitle.setPointerCapture(e.pointerId);
+}
+
+function checkForOutbound(x, maxX, y, maxY) {
+   const outBounds = [];
+   
+   if(x < 0) {
+      outBounds.push("left");
+   }
+   else if (maxX > 0 && x > maxX) {
+      outBounds.push("right");
+   }
+
+   if (y < 0) {
+      outBounds.push("top");
+   }
+   else if (maxY > 0 && y > maxY) {
+      outBounds.push("bottom");
+   }
+
+   return outBounds;
+}
+
+function correctOutbounds(winbox, currentX, maxX, currentY, maxY, outbounds) {
+   winbox.style.transition = "transform 0.5s ease-out";
+
+   let correctedX = currentX;
+   let correctedY = currentY;
+
+   if(outbounds.indexOf("left") >= 0) {
+      correctedX = 0;
+   }
+   else if (outbounds.indexOf("right") >= 0) {
+      correctedX = maxX;
+   }
+
+   if(outbounds.indexOf("top") >= 0) {
+      correctedY = 0;
+   }
+   else if (outbounds.indexOf("bottom") >= 0) {
+      correctedY = maxY;
+   }
+
+   winbox.style.transform = `translate3d(${correctedX}px, ${correctedY}px, 0)`;
+
+   setTimeout(() => {
+      winbox.style.transition = "";
+   }, 500)
+}
+
+function winboxDragEnd(e) {
+   const {
+      winboxHeaderTitle, 
+      winbox, 
+      currentX, 
+      currentY,
+      maxX,
+      maxY
+   } = getWinboxInfo(e);
+
+   winbox.setAttribute("is-dragging", "false");
+   winboxHeaderTitle.releasePointerCapture(e.pointerId);
+
+   // TODO Implement animated bounds checking
+   const outbounds = checkForOutbound(currentX, maxX, currentY, maxY);
+
+   if(!outbounds.length) return;
+
+   correctOutbounds(winbox, currentX, maxX, currentY, maxY, outbounds);
+}
+
+function winboxDrag(e) {
+   const {
+      isDragging,
+      xOffset,
+      yOffset,
+      winbox
+   } = getWinboxInfo(e);
+
+   if(!isDragging) return;
+
+   const newX = e.clientX - xOffset;
+   const newY = e.clientY - yOffset;
+
+   winbox.style.transform = `translate3d(${newX}px, ${newY}px, 0)`;
 }
 
 function createWinbox() {
@@ -125,9 +200,11 @@ function createWinbox() {
    let isDragging = false;
    let xOffset, yOffset, lastValidX, lastValidY;
 
-   headerTitle.addEventListener("pointerdown", handleWinboxPointerDown);
+   headerTitle.addEventListener("pointerdown", winboxDragStart);
 
-   headerTitle.addEventListener("pointerup", handleWinboxPointerUp);
+   headerTitle.addEventListener("pointerup", winboxDragEnd);
+
+   headerTitle.addEventListener("pointermove", winboxDrag);
 
 }
 
