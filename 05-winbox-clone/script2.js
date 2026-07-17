@@ -22,6 +22,8 @@ function getWinboxElementsAndStates(event) {
 
    const isDragging = winbox.getAttribute("is-dragging") === "true";
    const isMaximized = winbox.getAttribute("is-maximized") === "true";
+   const isResizing = winbox.getAttribute("is-resizing") === "true";
+
    const xOffset = Number(winbox.getAttribute("x-offset"));
    const yOffset = Number(winbox.getAttribute("y-offset"));
 
@@ -32,6 +34,7 @@ function getWinboxElementsAndStates(event) {
    const maxY = window.innerHeight - winbox.offsetHeight;
 
    return {
+      elementId,
       winboxHeaderTitle, 
       winboxId, 
       winbox, 
@@ -47,19 +50,21 @@ function getWinboxElementsAndStates(event) {
    };
 }
 
-function winboxDragStart(e) {
+function initializeWinboxDragOrResize(e) {
    const {
-      winboxHeaderTitle, 
+      elementId,
       winbox, 
       isMaximized, 
       currentX, 
       currentY
    } = getWinboxElementsAndStates(e);
 
+   const actionAttribute = elementId.includes("header") ? "is-dragging" : "is-resizing";
+
    if(isMaximized) return;
 
    winbox.style.zIndex = ++globalZIndex;
-   winbox.setAttribute("is-dragging", "true");
+   winbox.setAttribute(`${actionAttribute}`, "true");
 
    const xOffset = e.clientX - currentX;
    const yOffset = e.clientY - currentY;
@@ -67,7 +72,7 @@ function winboxDragStart(e) {
    winbox.setAttribute("x-offset", `${xOffset}`);
    winbox.setAttribute("y-offset", `${yOffset}`);
 
-   winboxHeaderTitle.setPointerCapture(e.pointerId);
+   e.currentTarget.setPointerCapture(e.pointerId);
 }
 
 function checkForOutbound(x, maxX, y, maxY) {
@@ -130,7 +135,6 @@ function winboxDragEnd(e) {
    winbox.setAttribute("is-dragging", "false");
    winboxHeaderTitle.releasePointerCapture(e.pointerId);
 
-   // TODO Implement animated bounds checking
    const outbounds = checkForOutbound(currentX, maxX, currentY, maxY);
 
    if(!outbounds.length) return;
@@ -157,7 +161,7 @@ function winboxDrag(e) {
 function addEventListenerToHeaderTitle(winbox) {
    const winboxHeaderTitle = winbox.querySelector('p[id$="header-title"]');
 
-   winboxHeaderTitle.addEventListener("pointerdown", winboxDragStart);
+   winboxHeaderTitle.addEventListener("pointerdown", initializeWinboxDragOrResize);
    winboxHeaderTitle.addEventListener("pointerup", winboxDragEnd);
    winboxHeaderTitle.addEventListener("pointermove", winboxDrag);
 }
@@ -180,6 +184,38 @@ function addEventListenerToFullScreenBtn(winbox) {
    })
 }
 
+function winboxResizeEnd(e) {
+   const {
+      winbox, 
+      currentX, 
+      currentY,
+      maxX,
+      maxY
+   } = getWinboxElementsAndStates(e);
+
+   winbox.setAttribute("is-resizing", "false");
+
+   const resizer = e.currentTarget;
+   resizer.releasePointerCapture(e.pointerId);
+
+   // TODO Implement animated outbounds checking
+   // const outbounds = checkForOutbound(currentX, maxX, currentY, maxY);
+
+   // if(!outbounds.length) return;
+
+   // correctOutbounds(winbox, currentX, maxX, currentY, maxY, outbounds);
+}
+
+function addEventListenerToResizers(winbox) {
+   const resizers = winbox.querySelectorAll('div[id*="resize"]');
+
+   resizers.forEach((resizer) => {
+      resizer.addEventListener("pointerdown", initializeWinboxDragOrResize);
+      resizer.addEventListener("pointerup", winboxResizeEnd);
+      // resizer.addEventListener("pointerdown", winboxResize);
+   })
+}
+
 function createWinbox() {
    const winboxNumber = ++winboxCount;
 
@@ -192,7 +228,7 @@ function createWinbox() {
 
    winbox.innerHTML = `
       <div id="winbox-${winboxNumber}-header" class="winbox-header">
-         <p id="winbox-${winboxNumber}-header-title" class="winbox-header-title" winbox-id="winbox-${winboxNumber}" is-dragging="false" is-maximized="false" x-offset="0" y-offset="0">Winbox ${winboxNumber}</p>
+         <p id="winbox-${winboxNumber}-header-title" class="winbox-header-title" winbox-id="winbox-${winboxNumber}" is-dragging="false" is-maximized="false" is-resizing="false" x-offset="0" y-offset="0">Winbox ${winboxNumber}</p>
          <button id="winbox-${winboxNumber}-hide-button">__</button>
          <button id="winbox-${winboxNumber}-min-max-btn" class="min-man-btn">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-square" viewBox="0 0 16 16">
@@ -231,6 +267,8 @@ function createWinbox() {
    winbox.style.transform = `translate3d(${randomX}px, ${randomY}px, 0)`;
 
    addEventListenerToHeaderTitle(winbox);
+   addEventListenerToResizers(winbox);
+
    addEventListenerToCloseBtn(winbox);
    addEventListenerToFullScreenBtn(winbox);
 }
