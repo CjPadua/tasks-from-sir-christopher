@@ -5,11 +5,20 @@ const tabContainer = document.getElementById("tab-bar");
 let globalZIndex = 10;
 let winboxCount = 0;
 
-function getWinboxInfo(event) {
-   const winboxHeaderTitle = event.currentTarget;
+function getWinBoxId(elementId) {
+   const elementIdArray = elementId.split("-");
+   const winboxNumber = elementIdArray.find((idSubstring) => parseInt(idSubstring));
 
-   const winboxId = winboxHeaderTitle.getAttribute("winbox-id");
+   return `winbox-${winboxNumber}`;
+}
+
+function getWinboxElementsAndStates(event) {
+   const elementId = event.currentTarget.getAttribute("id");
+
+   const winboxId = getWinBoxId(elementId);
    const winbox = document.getElementById(winboxId);
+
+   const winboxHeaderTitle = winbox.querySelector(`p[id$="header-title"]`);
 
    const isDragging = winbox.getAttribute("is-dragging") === "true";
    const isMaximized = winbox.getAttribute("is-maximized") === "true";
@@ -45,7 +54,7 @@ function winboxDragStart(e) {
       isMaximized, 
       currentX, 
       currentY
-   } = getWinboxInfo(e);
+   } = getWinboxElementsAndStates(e);
 
    if(isMaximized) return;
 
@@ -116,7 +125,7 @@ function winboxDragEnd(e) {
       currentY,
       maxX,
       maxY
-   } = getWinboxInfo(e);
+   } = getWinboxElementsAndStates(e);
 
    winbox.setAttribute("is-dragging", "false");
    winboxHeaderTitle.releasePointerCapture(e.pointerId);
@@ -135,7 +144,7 @@ function winboxDrag(e) {
       xOffset,
       yOffset,
       winbox
-   } = getWinboxInfo(e);
+   } = getWinboxElementsAndStates(e);
 
    if(!isDragging) return;
 
@@ -145,26 +154,26 @@ function winboxDrag(e) {
    winbox.style.transform = `translate3d(${newX}px, ${newY}px, 0)`;
 }
 
-function addEventListenerToHeaderTitle(winbox, winboxNumber) {
-   const headerTitle = winbox.querySelector(`#winbox-${winboxNumber}-header-title`);
+function addEventListenerToHeaderTitle(winbox) {
+   const winboxHeaderTitle = winbox.querySelector('p[id$="header-title"]');
 
-   headerTitle.addEventListener("pointerdown", winboxDragStart);
-   headerTitle.addEventListener("pointerup", winboxDragEnd);
-   headerTitle.addEventListener("pointermove", winboxDrag);
+   winboxHeaderTitle.addEventListener("pointerdown", winboxDragStart);
+   winboxHeaderTitle.addEventListener("pointerup", winboxDragEnd);
+   winboxHeaderTitle.addEventListener("pointermove", winboxDrag);
 }
 
-function addEventListenerToCloseBtn(winbox, winboxNumber) {
-   const closeBtn = winbox.querySelector(`#winbox-${winboxNumber}-close-btn`);
+function addEventListenerToCloseBtn(winbox) {
+   const closeBtn = winbox.querySelector('button[id$="close-btn"]');
 
    closeBtn.addEventListener("click", () => {
       winbox.remove();
    })
 }
 
-function addEventListenerToFullScreenBtn(winbox, winboxNumber) {
-   const fullScreenBtn = winbox.querySelector(`#winbox-${winboxNumber}-full-screen-btn`);
+function addEventListenerToFullScreenBtn(winbox) {
+   const fullScreenBtn = winbox.querySelector('button[id$="full-screen-btn"]');
 
-   const winboxBody = winbox.querySelector(`#winbox-${winboxNumber}-body`)
+   const winboxBody = winbox.querySelector('div[id$=body]');
 
    fullScreenBtn.addEventListener("click", () => {
       winboxBody.requestFullscreen();
@@ -221,9 +230,9 @@ function createWinbox() {
 
    winbox.style.transform = `translate3d(${randomX}px, ${randomY}px, 0)`;
 
-   addEventListenerToHeaderTitle(winbox, winboxNumber);
-   addEventListenerToCloseBtn(winbox, winboxNumber);
-   addEventListenerToFullScreenBtn(winbox, winboxNumber);
+   addEventListenerToHeaderTitle(winbox);
+   addEventListenerToCloseBtn(winbox);
+   addEventListenerToFullScreenBtn(winbox);
 }
 
 createWinboxBtn.addEventListener("click", createWinbox);
