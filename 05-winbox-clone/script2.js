@@ -27,11 +27,17 @@ function getWinboxElementsAndStates(event) {
    const xOffset = Number(winbox.getAttribute("x-offset"));
    const yOffset = Number(winbox.getAttribute("y-offset"));
 
-   const currentX = Number(winbox.getBoundingClientRect().x);
-   const currentY = Number(winbox.getBoundingClientRect().y);
+   const xResizeStart = Number(winbox.getAttribute("x-resize-start"));
+   const yResizeStart = Number(winbox.getAttribute("y-resize-start"));
 
-   const maxX = window.innerWidth - winbox.offsetWidth;
-   const maxY = window.innerHeight - winbox.offsetHeight;
+   const currentXPos = Number(winbox.getBoundingClientRect().x);
+   const currentYPos = Number(winbox.getBoundingClientRect().y);
+   
+   const currentWidth = Number(winbox.offsetWidth);
+   const currentHeight = Number(winbox.offsetHeight);
+
+   const maxX = window.innerWidth - currentWidth;
+   const maxY = window.innerHeight - currentHeight;
 
    return {
       elementId,
@@ -39,12 +45,16 @@ function getWinboxElementsAndStates(event) {
       winboxId, 
       winbox, 
       isMaximized, 
-      currentX, 
-      currentY, 
+      currentXPos, 
+      currentYPos,
+      currentWidth,
+      currentHeight, 
       isDragging, 
       isMaximized, 
       xOffset, 
       yOffset,
+      xResizeStart,
+      yResizeStart,
       maxX,
       maxY
    };
@@ -55,19 +65,20 @@ function initializeWinboxDragOrResize(e) {
       elementId,
       winbox, 
       isMaximized, 
-      currentX, 
-      currentY
+      currentXPos, 
+      currentYPos
    } = getWinboxElementsAndStates(e);
-
-   const actionAttribute = elementId.includes("header") ? "is-dragging" : "is-resizing";
 
    if(isMaximized) return;
 
    winbox.style.zIndex = ++globalZIndex;
-   winbox.setAttribute(`${actionAttribute}`, "true");
+   winbox.setAttribute("is-dragging", "true");
 
-   const xOffset = e.clientX - currentX;
-   const yOffset = e.clientY - currentY;
+   winbox.setAttribute("x-resize-start", `${e.clientX}`);
+   winbox.setAttribute("y-resize-start", `${e.clientY}`);
+
+   const xOffset = e.clientX - currentXPos;
+   const yOffset = e.clientY - currentYPos;
 
    winbox.setAttribute("x-offset", `${xOffset}`);
    winbox.setAttribute("y-offset", `${yOffset}`);
@@ -95,11 +106,11 @@ function checkForOutbound(x, maxX, y, maxY) {
    return outBounds;
 }
 
-function correctOutbounds(winbox, currentX, maxX, currentY, maxY, outbounds) {
+function correctOutbounds(winbox, currentXPos, maxX, currentYPos, maxY, outbounds) {
    winbox.style.transition = "transform 0.5s ease-out";
 
-   let correctedX = currentX;
-   let correctedY = currentY;
+   let correctedX = currentXPos;
+   let correctedY = currentYPos;
 
    if(outbounds.indexOf("left") >= 0) {
       correctedX = 0;
@@ -115,7 +126,7 @@ function correctOutbounds(winbox, currentX, maxX, currentY, maxY, outbounds) {
       correctedY = maxY;
    }
 
-   winbox.style.transform = `translate3d(${correctedX}px, ${correctedY}px, 0)`;
+   dragWinbox(winbox, correctedX, correctedY);
 
    setTimeout(() => {
       winbox.style.transition = "";
@@ -126,8 +137,8 @@ function winboxDragEnd(e) {
    const {
       winboxHeaderTitle, 
       winbox, 
-      currentX, 
-      currentY,
+      currentXPos, 
+      currentYPos,
       maxX,
       maxY
    } = getWinboxElementsAndStates(e);
@@ -135,11 +146,15 @@ function winboxDragEnd(e) {
    winbox.setAttribute("is-dragging", "false");
    winboxHeaderTitle.releasePointerCapture(e.pointerId);
 
-   const outbounds = checkForOutbound(currentX, maxX, currentY, maxY);
+   const outbounds = checkForOutbound(currentXPos, maxX, currentYPos, maxY);
 
    if(!outbounds.length) return;
 
-   correctOutbounds(winbox, currentX, maxX, currentY, maxY, outbounds);
+   correctOutbounds(winbox, currentXPos, maxX, currentYPos, maxY, outbounds);
+}
+
+function dragWinbox(winbox, newX, newY) {
+   winbox.style.transform = `translate3d(${newX}px, ${newY}px, 0)`;
 }
 
 function winboxDrag(e) {
@@ -155,7 +170,7 @@ function winboxDrag(e) {
    const newX = e.clientX - xOffset;
    const newY = e.clientY - yOffset;
 
-   winbox.style.transform = `translate3d(${newX}px, ${newY}px, 0)`;
+   dragWinbox(winbox, newX, newY);
 }
 
 function addEventListenerToHeaderTitle(winbox) {
@@ -187,23 +202,83 @@ function addEventListenerToFullScreenBtn(winbox) {
 function winboxResizeEnd(e) {
    const {
       winbox, 
-      currentX, 
-      currentY,
+      currentXPos, 
+      currentYPos,
       maxX,
       maxY
    } = getWinboxElementsAndStates(e);
 
-   winbox.setAttribute("is-resizing", "false");
+   winbox.setAttribute("is-dragging", "false");
 
    const resizer = e.currentTarget;
    resizer.releasePointerCapture(e.pointerId);
 
    // TODO Implement animated outbounds checking
-   // const outbounds = checkForOutbound(currentX, maxX, currentY, maxY);
+   // const outbounds = checkForOutbound(currentXPos, maxX, currentYPos, maxY);
 
    // if(!outbounds.length) return;
 
-   // correctOutbounds(winbox, currentX, maxX, currentY, maxY, outbounds);
+   // correctOutbounds(winbox, currentXPos, maxX, currentYPos, maxY, outbounds);
+}
+
+function getResizeDirection(elementId) {
+   const indexOfWordResize = elementId.indexOf("resize-");
+   const directionStartingIndex = indexOfWordResize + 7;
+
+   return `${elementId.substring(directionStartingIndex)}`
+}
+
+function winboxResize(e) {
+   const {
+      elementId,
+      winbox,
+      isDragging,
+      currentXPos,
+      currentYPos,
+      xResizeStart,
+      yResizeStart,
+      currentWidth,
+      currentHeight,
+      xOffset,
+      yOffset
+   } = getWinboxElementsAndStates(e);
+
+   if(!isDragging) return;
+
+   const resizeDirection = getResizeDirection(elementId);
+
+   let xToAdd = 0;
+   let yToAdd = 0;
+
+   let newX = currentXPos;
+   let newY = currentYPos;
+
+   const pointerX = e.clientX;
+   const pointerY = e.clientY;
+
+   if(resizeDirection.includes("right")) {
+      xToAdd = pointerX - xResizeStart;
+   }
+   else if(resizeDirection.includes("left")) {
+      xToAdd = xResizeStart - pointerX;
+      newX = pointerX - xOffset;
+   }
+
+   if(resizeDirection.includes("top")) {
+      yToAdd = yResizeStart - pointerY;
+      newY = pointerY - yOffset;
+   }
+   else if(resizeDirection.includes("bottom")) {
+      yToAdd = pointerY - yResizeStart;
+   }
+
+   dragWinbox(winbox, newX, newY);
+   
+   winbox.style.width = `${currentWidth + xToAdd}px`;
+   winbox.style.height = `${currentHeight + yToAdd}px`;
+
+   winbox.setAttribute("x-resize-start", `${pointerX}`);
+   winbox.setAttribute("y-resize-start", `${[pointerY]}`);
 }
 
 function addEventListenerToResizers(winbox) {
@@ -212,7 +287,7 @@ function addEventListenerToResizers(winbox) {
    resizers.forEach((resizer) => {
       resizer.addEventListener("pointerdown", initializeWinboxDragOrResize);
       resizer.addEventListener("pointerup", winboxResizeEnd);
-      // resizer.addEventListener("pointerdown", winboxResize);
+      resizer.addEventListener("pointermove", winboxResize);
    })
 }
 
@@ -228,7 +303,7 @@ function createWinbox() {
 
    winbox.innerHTML = `
       <div id="winbox-${winboxNumber}-header" class="winbox-header">
-         <p id="winbox-${winboxNumber}-header-title" class="winbox-header-title" winbox-id="winbox-${winboxNumber}" is-dragging="false" is-maximized="false" is-resizing="false" x-offset="0" y-offset="0">Winbox ${winboxNumber}</p>
+         <p id="winbox-${winboxNumber}-header-title" class="winbox-header-title" winbox-id="winbox-${winboxNumber}" is-dragging="false" is-maximized="false" x-offset="0" y-offset="0" x-resize-start="0" y-resize-start="0">Winbox ${winboxNumber}</p>
          <button id="winbox-${winboxNumber}-hide-button">__</button>
          <button id="winbox-${winboxNumber}-min-max-btn" class="min-man-btn">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-square" viewBox="0 0 16 16">
