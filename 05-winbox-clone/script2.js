@@ -86,13 +86,13 @@ function initializeWinboxDragOrResize(e) {
    e.currentTarget.setPointerCapture(e.pointerId);
 }
 
-function checkForOutbound(x, maxX, y, maxY) {
+function checkForOutbound(x, maxX, y, maxY, event) {
    const outBounds = [];
    
    if(x < 0) {
       outBounds.push("left");
    }
-   else if (maxX > 0 && x > maxX) {
+   else if (maxX > 0 && x >= maxX) {
       outBounds.push("right");
    }
 
@@ -106,17 +106,27 @@ function checkForOutbound(x, maxX, y, maxY) {
    return outBounds;
 }
 
-function correctOutbounds(winbox, currentXPos, maxX, currentYPos, maxY, outbounds) {
-   winbox.style.transition = "transform 0.5s ease-out";
+function correctOutbounds(action, winbox, currentXPos, maxX, currentYPos, maxY, outbounds, currentWidth = 0, currentHeight = 0, e = null) {
+   winbox.style.transition = "all 0.5s ease-out";
 
    let correctedX = currentXPos;
    let correctedY = currentYPos;
+   
+   let correctedWidth = currentWidth;
+   let correctedHeight = currentHeight;
 
    if(outbounds.indexOf("left") >= 0) {
       correctedX = 0;
+      correctedWidth = currentWidth + currentXPos;
    }
    else if (outbounds.indexOf("right") >= 0) {
       correctedX = maxX;
+   }
+
+   if(e.clientX >= window.innerWidth) {
+      const xToSubtract = e.clientX - window.innerWidth
+      correctedX = currentXPos;
+      correctedWidth = currentWidth - xToSubtract - 6;
    }
 
    if(outbounds.indexOf("top") >= 0) {
@@ -131,6 +141,10 @@ function correctOutbounds(winbox, currentXPos, maxX, currentYPos, maxY, outbound
    setTimeout(() => {
       winbox.style.transition = "";
    }, 500)
+
+   if(action !== "resize") return;
+
+   scaleWinbox(winbox, correctedWidth, correctedHeight);
 }
 
 function winboxDragEnd(e) {
@@ -146,11 +160,11 @@ function winboxDragEnd(e) {
    winbox.setAttribute("is-dragging", "false");
    winboxHeaderTitle.releasePointerCapture(e.pointerId);
 
-   const outbounds = checkForOutbound(currentXPos, maxX, currentYPos, maxY);
+   const outbounds = checkForOutbound(currentXPos, maxX, currentYPos, maxY, e);
 
    if(!outbounds.length) return;
 
-   correctOutbounds(winbox, currentXPos, maxX, currentYPos, maxY, outbounds);
+   correctOutbounds("drag", winbox, currentXPos, maxX, currentYPos, maxY, outbounds, 0, 0, e);
 }
 
 function dragWinbox(winbox, newX, newY) {
@@ -205,7 +219,9 @@ function winboxResizeEnd(e) {
       currentXPos, 
       currentYPos,
       maxX,
-      maxY
+      maxY,
+      currentWidth,
+      currentHeight
    } = getWinboxElementsAndStates(e);
 
    winbox.setAttribute("is-dragging", "false");
@@ -214,11 +230,11 @@ function winboxResizeEnd(e) {
    resizer.releasePointerCapture(e.pointerId);
 
    // TODO Implement animated outbounds checking
-   // const outbounds = checkForOutbound(currentXPos, maxX, currentYPos, maxY);
+   const outbounds = checkForOutbound(currentXPos, maxX, currentYPos, maxY, e);
 
-   // if(!outbounds.length) return;
+   if(!outbounds.length) return;
 
-   // correctOutbounds(winbox, currentXPos, maxX, currentYPos, maxY, outbounds);
+   correctOutbounds("resize", winbox, currentXPos, maxX, currentYPos, maxY, outbounds, currentWidth, currentHeight, e);
 }
 
 function getResizeDirection(elementId) {
@@ -226,6 +242,11 @@ function getResizeDirection(elementId) {
    const directionStartingIndex = indexOfWordResize + 7;
 
    return `${elementId.substring(directionStartingIndex)}`
+}
+
+function scaleWinbox(winbox, newWidth, newHeight) {
+   winbox.style.width = `${newWidth}px`;
+   winbox.style.height = `${newHeight}px`;
 }
 
 function winboxResize(e) {
@@ -272,13 +293,14 @@ function winboxResize(e) {
       yToAdd = pointerY - yResizeStart;
    }
 
+   const newWidth = currentWidth + xToAdd;
+   const newHeight = currentHeight + yToAdd;
+
    dragWinbox(winbox, newX, newY);
-   
-   winbox.style.width = `${currentWidth + xToAdd}px`;
-   winbox.style.height = `${currentHeight + yToAdd}px`;
+   scaleWinbox(winbox, newWidth, newHeight);
 
    winbox.setAttribute("x-resize-start", `${pointerX}`);
-   winbox.setAttribute("y-resize-start", `${[pointerY]}`);
+   winbox.setAttribute("y-resize-start", `${pointerY}`);
 }
 
 function addEventListenerToResizers(winbox) {
