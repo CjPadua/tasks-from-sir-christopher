@@ -71,6 +71,8 @@ function initializeWinboxDragOrResize(e) {
 
    if(isMaximized) return;
 
+   deactivateBodyShade(winbox);
+
    winbox.style.zIndex = ++globalZIndex;
    winbox.setAttribute("is-dragging", "true");
 
@@ -217,7 +219,22 @@ function addEventListenerToCloseBtn(winbox) {
 
    closeBtn.addEventListener("click", () => {
       winbox.remove();
+
+      const winboxes = Array.from(document.querySelectorAll(".winbox"));
+   
+      let winboxIndex = 0;
+      let greatestZIndex = 0;
+   
+      winboxes.forEach((winbox, index) => {
+         if(winbox.style.zIndex > greatestZIndex) {
+            greatestZIndex = winbox.style.zIndex;
+            winboxIndex = index;
+         }
+      })
+   
+      winboxes[winboxIndex].querySelector('div[id$="body-shade"]').classList.add("inactive-body-shade");
    })
+
 }
 
 function addEventListenerToFullScreenBtn(winbox) {
@@ -246,7 +263,6 @@ function winboxResizeEnd(e) {
    const resizer = e.currentTarget;
    resizer.releasePointerCapture(e.pointerId);
 
-   // TODO Implement animated outbounds checking
    const outbounds = checkForOutbound(currentXPos, maxX, currentYPos, maxY, e);
 
    if(!outbounds.length) return;
@@ -330,6 +346,11 @@ function addEventListenerToResizers(winbox) {
    })
 }
 
+function deactivateBodyShade(winbox) {
+   document.querySelector(".inactive-body-shade")?.classList.remove("inactive-body-shade");
+   winbox.querySelector('div[id$="body-shade"]').classList.add("inactive-body-shade");
+}
+
 function createWinbox() {
    const winboxNumber = ++winboxCount;
 
@@ -344,7 +365,7 @@ function createWinbox() {
       <div id="winbox-${winboxNumber}-header" class="winbox-header">
          <p id="winbox-${winboxNumber}-header-title" class="winbox-header-title" winbox-id="winbox-${winboxNumber}" is-dragging="false" is-maximized="false" x-offset="0" y-offset="0" x-resize-start="0" y-resize-start="0">Winbox ${winboxNumber}</p>
          <button id="winbox-${winboxNumber}-hide-button">__</button>
-         <button id="winbox-${winboxNumber}-min-max-btn" class="min-man-btn">
+         <button id="winbox-${winboxNumber}-min-max-btn" class="min-max-btn">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-square" viewBox="0 0 16 16">
             <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/>
             </svg>
@@ -361,6 +382,7 @@ function createWinbox() {
          </button>
       </div>
       <div id="winbox-${winboxNumber}-body" class="winbox-body">
+         <div id="winbox-${winboxNumber}-body-shade" class="active-body-shade"></div>
          <iframe src="" frameborder="0" id="winbox-${winboxNumber}-iframe" class="winbox-iframe"></iframe>
       </div>
       <div id="winbox-${winboxNumber}-resize-top" class="winbox-resize-top"></div>
@@ -379,6 +401,8 @@ function createWinbox() {
    let randomY = Math.random() * 100 + 50;
 
    winbox.style.transform = `translate3d(${randomX}px, ${randomY}px, 0)`;
+
+   deactivateBodyShade(winbox);
 
    addEventListenerToHeaderTitle(winbox);
    addEventListenerToResizers(winbox);
