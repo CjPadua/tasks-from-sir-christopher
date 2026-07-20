@@ -92,21 +92,30 @@ function checkForOutbound(x, maxX, y, maxY, event) {
    if(x < 0) {
       outBounds.push("left");
    }
-   else if (maxX > 0 && x >= maxX) {
+   else if (maxX >= 0 && x >= maxX) {
       outBounds.push("right");
+   }
+
+   if (maxX < 0) {
+      outBounds.push("width");
    }
 
    if (y < 0) {
       outBounds.push("top");
    }
-   else if (maxY > 0 && y > maxY) {
+   else if (maxY >= 0 && y > maxY) {
       outBounds.push("bottom");
+   }
+
+   if(maxY < 0) {
+      outBounds.push("height");
    }
 
    return outBounds;
 }
 
 function correctOutbounds(action, winbox, currentXPos, maxX, currentYPos, maxY, outbounds, currentWidth = 0, currentHeight = 0, e = null) {
+
    winbox.style.transition = "all 0.5s ease-out";
 
    let correctedX = currentXPos;
@@ -123,10 +132,10 @@ function correctOutbounds(action, winbox, currentXPos, maxX, currentYPos, maxY, 
       correctedX = maxX;
    }
 
-   if(e.clientX >= window.innerWidth) {
-      const xToSubtract = e.clientX - window.innerWidth
+   if(e.clientX >= window.innerWidth && action === "resize") {
+      const xToSubtract = currentWidth - (e.clientX - currentXPos);
       correctedX = currentXPos;
-      correctedWidth = currentWidth - xToSubtract - 6;
+      correctedWidth = currentWidth - xToSubtract;
    }
 
    if(outbounds.indexOf("top") >= 0) {
@@ -134,6 +143,14 @@ function correctOutbounds(action, winbox, currentXPos, maxX, currentYPos, maxY, 
    }
    else if (outbounds.indexOf("bottom") >= 0) {
       correctedY = maxY;
+   }
+
+   if(outbounds.indexOf("width") >= 0) {
+      correctedWidth = window.innerWidth;
+   }
+
+   if(outbounds.indexOf("height") >= 0) {
+      correctedHeight = window.innerHeight;
    }
 
    dragWinbox(winbox, correctedX, correctedY);
