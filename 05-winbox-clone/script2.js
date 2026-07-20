@@ -12,6 +12,26 @@ function getWinBoxId(elementId) {
    return `winbox-${winboxNumber}`;
 }
 
+function getWinboxPositionAndDimensions(winbox) {
+   const currentXPos = Number(winbox.getBoundingClientRect().x);
+   const currentYPos = Number(winbox.getBoundingClientRect().y);
+   
+   const currentWidth = Number(winbox.offsetWidth);
+   const currentHeight = Number(winbox.offsetHeight);
+
+   const maxX = window.innerWidth - currentWidth;
+   const maxY = window.innerHeight - currentHeight;
+
+   return {
+      currentXPos, 
+      currentYPos,
+      currentWidth,
+      currentHeight, 
+      maxX,
+      maxY
+   }
+}
+
 function getWinboxElementsAndStates(event) {
    const elementId = event.currentTarget.getAttribute("id");
 
@@ -29,15 +49,16 @@ function getWinboxElementsAndStates(event) {
 
    const xResizeStart = Number(winbox.getAttribute("x-resize-start"));
    const yResizeStart = Number(winbox.getAttribute("y-resize-start"));
-
-   const currentXPos = Number(winbox.getBoundingClientRect().x);
-   const currentYPos = Number(winbox.getBoundingClientRect().y);
    
-   const currentWidth = Number(winbox.offsetWidth);
-   const currentHeight = Number(winbox.offsetHeight);
+   const {
+      currentXPos, 
+      currentYPos,
+      currentWidth,
+      currentHeight, 
+      maxX,
+      maxY
+   } = getWinboxPositionAndDimensions(winbox);
 
-   const maxX = window.innerWidth - currentWidth;
-   const maxY = window.innerHeight - currentHeight;
 
    return {
       elementId,
@@ -116,7 +137,10 @@ function checkForOutbound(x, maxX, y, maxY, event) {
    return outBounds;
 }
 
-function correctOutbounds(action, winbox, currentXPos, maxX, currentYPos, maxY, outbounds, currentWidth = 0, currentHeight = 0, e = null) {
+function correctOutbounds(action, winbox, currentXPos, maxX, currentYPos, maxY, currentWidth = 0, currentHeight = 0, e = null) {
+
+   const outbounds = checkForOutbound(currentXPos, maxX, currentYPos, maxY, e);
+   if(!outbounds.length) return;
 
    winbox.style.transition = "all 0.5s ease-out";
 
@@ -134,7 +158,7 @@ function correctOutbounds(action, winbox, currentXPos, maxX, currentYPos, maxY, 
       correctedX = maxX;
    }
 
-   if(e.clientX >= window.innerWidth && action === "resize") {
+   if(e?.clientX >= window.innerWidth && action === "resize") {
       const xToSubtract = currentWidth - (e.clientX - currentXPos);
       correctedX = currentXPos;
       correctedWidth = currentWidth - xToSubtract;
@@ -179,11 +203,7 @@ function winboxDragEnd(e) {
    winbox.setAttribute("is-dragging", "false");
    winboxHeaderTitle.releasePointerCapture(e.pointerId);
 
-   const outbounds = checkForOutbound(currentXPos, maxX, currentYPos, maxY, e);
-
-   if(!outbounds.length) return;
-
-   correctOutbounds("drag", winbox, currentXPos, maxX, currentYPos, maxY, outbounds, 0, 0, e);
+   correctOutbounds("drag", winbox, currentXPos, maxX, currentYPos, maxY, 0, 0, e);
 }
 
 function dragWinbox(winbox, newX, newY) {
@@ -263,11 +283,7 @@ function winboxResizeEnd(e) {
    const resizer = e.currentTarget;
    resizer.releasePointerCapture(e.pointerId);
 
-   const outbounds = checkForOutbound(currentXPos, maxX, currentYPos, maxY, e);
-
-   if(!outbounds.length) return;
-
-   correctOutbounds("resize", winbox, currentXPos, maxX, currentYPos, maxY, outbounds, currentWidth, currentHeight, e);
+   correctOutbounds("resize", winbox, currentXPos, maxX, currentYPos, maxY, currentWidth, currentHeight, e);
 }
 
 function getResizeDirection(elementId) {
@@ -412,3 +428,19 @@ function createWinbox() {
 }
 
 createWinboxBtn.addEventListener("click", createWinbox);
+
+window.addEventListener("resize", () => {
+   const winboxes = document.querySelectorAll(".winbox");
+
+   winboxes.forEach((winbox) => {
+
+      const {
+         currentXPos, 
+         currentYPos,
+         maxX,
+         maxY
+      } = getWinboxPositionAndDimensions(winbox);
+
+      correctOutbounds("drag", winbox, currentXPos, maxX, currentYPos, maxY);
+   })
+})
