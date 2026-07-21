@@ -552,31 +552,37 @@ function displayWinboxTab(event) {
 
    const tab = document.createElement("div");
    tab.classList.add("winbox-tab");
+   
+   tab.innerHTML =  `
+   <p
+   id="tab-${winboxNumber}-title"
+   class="tab-title">Winbox ${winboxNumber}
+   </p>
+   <button 
+   id="tab-${winboxNumber}-max-btn"
+   class="tab-max-btn">
+   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-square" viewBox="0 0 16 16">
+   <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/>
+   </svg>
+   </button>
+   <button 
+   id="tab-${winboxNumber}-close-btn"
+   class="tab-close-btn">
+   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+   <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+   </svg>
+   </button>
+   `;
+   
+   tabContainer.appendChild(tab);
+
    tab.style.backgroundColor = winbox.style.backgroundColor;
    tab.style.color = winbox.style.color;
 
-   tab.innerHTML =  `
-      <p
-         id="tab-${winboxNumber}-title"
-         class="tab-title">Winbox ${winboxNumber}
-      </p>
-      <button 
-         id="tab-${winboxNumber}-max-btn"
-         class="tab-max-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-square" viewBox="0 0 16 16">
-               <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/>
-            </svg>
-      </button>
-      <button 
-         id="tab-${winboxNumber}-close-btn"
-         class="tab-close-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
-               <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
-            </svg>
-      </button>
-   `;
-
-   tabContainer.appendChild(tab);
+   const tabButtons = Array.from(tab.querySelectorAll("button"));
+   tabButtons.forEach((tabButton) => {
+      tabButton.style.color = winbox.style.color;
+   })
 
    addEventListenerToTabCloseBtn(tab);
    addEventListenerToTabMaxBtn(tab);
@@ -604,11 +610,6 @@ function createWinbox() {
    winbox.setAttribute("id", `winbox-${winboxCount}`);
    
    winbox.classList.add("winbox");
-
-   const randomColor = `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`;
-
-   winbox.style.backgroundColor = randomColor;
-   winbox.style.color = `contrast-color(${randomColor})`;
 
    winbox.innerHTML = `
       <div id="winbox-${winboxNumber}-header" class="winbox-header">
@@ -659,6 +660,16 @@ function createWinbox() {
    `;
 
    document.body.appendChild(winbox);
+
+   const randomColor = `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`;
+
+   winbox.style.backgroundColor = randomColor;
+   winbox.style.color = `contrast-color(${randomColor})`;
+
+   const winboxButtons = Array.from(winbox.querySelectorAll("button"));
+   winboxButtons.forEach((winboxButton) => {
+      winboxButton.style.color = `contrast-color(${randomColor})`;
+   })
 
    let randomX = Math.random() * 100 + 50;
    let randomY = Math.random() * 100 + 50;
