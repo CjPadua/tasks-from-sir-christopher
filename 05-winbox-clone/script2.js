@@ -38,6 +38,8 @@ function getWinboxElementsAndStates(event) {
    const winboxId = getWinBoxId(elementId);
    const winbox = document.getElementById(winboxId);
 
+   const winboxBody = winbox.querySelector(`div[id$="body"]`);
+   const winboxHeader = winbox.querySelector(`div[id$="header"]`);
    const winboxHeaderTitle = winbox.querySelector(`p[id$="header-title"]`);
 
    const isDragging = winbox.getAttribute("is-dragging") === "true";
@@ -49,6 +51,12 @@ function getWinboxElementsAndStates(event) {
 
    const xResizeStart = Number(winbox.getAttribute("x-resize-start"));
    const yResizeStart = Number(winbox.getAttribute("y-resize-start"));
+
+   const previousX = Number(winbox.getAttribute("previous-x"));
+   const previousY = Number(winbox.getAttribute("previous-y"));
+
+   const previousWidth = Number(winbox.getAttribute("previous-width"));
+   const previousHeight = Number(winbox.getAttribute("previous-height"));
    
    const {
       currentXPos, 
@@ -64,7 +72,9 @@ function getWinboxElementsAndStates(event) {
       elementId,
       winboxHeaderTitle, 
       winboxId, 
-      winbox, 
+      winbox,
+      winboxBody,
+      winboxHeader, 
       isMaximized, 
       currentXPos, 
       currentYPos,
@@ -77,7 +87,11 @@ function getWinboxElementsAndStates(event) {
       xResizeStart,
       yResizeStart,
       maxX,
-      maxY
+      maxY,
+      previousX,
+      previousY,
+      previousWidth,
+      previousHeight
    };
 }
 
@@ -92,9 +106,8 @@ function initializeWinboxDragOrResize(e) {
 
    if(isMaximized) return;
 
-   deactivateBodyShade(winbox);
+   setAsActiveWinbox(winbox);
 
-   winbox.style.zIndex = ++globalZIndex;
    winbox.setAttribute("is-dragging", "true");
 
    winbox.setAttribute("x-resize-start", `${e.clientX}`);
@@ -252,7 +265,7 @@ function addEventListenerToCloseBtn(winbox) {
          }
       })
    
-      winboxes[winboxIndex].querySelector('div[id$="body-shade"]').classList.add("inactive-body-shade");
+      winboxes[winboxIndex]?.querySelector('div[id$="body-shade"]').classList.add("inactive-body-shade");
    })
 
 }
@@ -263,6 +276,7 @@ function addEventListenerToFullScreenBtn(winbox) {
    const winboxBody = winbox.querySelector('div[id$=body]');
 
    fullScreenBtn.addEventListener("click", () => {
+      setAsActiveWinbox(winbox);
       winboxBody.requestFullscreen();
    })
 }
@@ -362,9 +376,94 @@ function addEventListenerToResizers(winbox) {
    })
 }
 
-function deactivateBodyShade(winbox) {
+function setAsActiveWinbox(winbox) {
+   winbox.style.zIndex = ++globalZIndex;
+
    document.querySelector(".inactive-body-shade")?.classList.remove("inactive-body-shade");
    winbox.querySelector('div[id$="body-shade"]').classList.add("inactive-body-shade");
+}
+
+function minimizeWinbox(
+   winbox, 
+   winboxBody, 
+   winboxHeader,
+   previousX,
+   previousY,
+   previousWidth,
+   previousHeight
+) {
+   mainContainer.removeChild(winbox);
+   document.body.appendChild(winbox);
+
+   winbox.setAttribute("is-maximized", "false");
+
+   winbox.style.transform = `translate3d(${previousX}px, ${previousY}px, 0)`;
+   winbox.classList.toggle("maximized-window");
+   winboxBody.classList.toggle("maximized-body");
+   winboxHeader.classList.toggle("maximized-header");
+}
+
+function maximizeWinbox(
+   winbox, 
+   winboxBody, 
+   winboxHeader,
+   currentXPos,
+   currentYPos,
+   currentWidth, 
+   currentHeight,
+) {
+   document.body.removeChild(winbox);
+
+   if(mainContainer.childElementCount) {
+      mainContainer.insertBefore(winbox, mainContainer.firstChild)
+   }
+   else {
+      mainContainer.appendChild(winbox);
+   }
+
+   winbox.setAttribute("previous-x", currentXPos);
+   winbox.setAttribute("previous-y", currentYPos);
+   winbox.setAttribute("previous-width", currentWidth);
+   winbox.setAttribute("previous-height", currentHeight);
+
+   winbox.setAttribute("is-maximized", "true");
+
+   winbox.style.transform = `translate3d(0px, 0px, 0)`;
+   winbox.classList.toggle("maximized-window");
+   winboxBody.classList.toggle("maximized-body");
+   winboxHeader.classList.toggle("maximized-header");
+}
+
+function toggleMinMaxWinbox(event) {
+   const {
+      winbox,
+      winboxBody,
+      winboxHeader,
+      winboxHeaderTitle,
+      isMaximized,
+      previousX,
+      previousY,
+      previousWidth,
+      previousHeight,
+      currentWidth,
+      currentHeight,
+      currentXPos,
+      currentYPos
+   } = getWinboxElementsAndStates(event);
+
+   setAsActiveWinbox(winbox);
+
+   if(isMaximized) {
+      minimizeWinbox(winbox, winboxBody, winboxHeader, previousX, previousY, previousWidth, previousHeight);
+      return;
+   }
+
+   maximizeWinbox(winbox, winboxBody, winboxHeader, currentXPos,currentYPos, currentWidth, currentHeight);
+}
+
+function addEventListenerToMinMaxBtn(winbox) {
+   const minMaxBtn = winbox.querySelector('button[id$="min-max-btn"]');
+   minMaxBtn.addEventListener("click", toggleMinMaxWinbox);
 }
 
 function createWinbox() {
@@ -374,12 +473,25 @@ function createWinbox() {
    winbox.setAttribute("id", `winbox-${winboxCount}`);
    
    winbox.classList.add("winbox");
-   winbox.style.zIndex = ++globalZIndex;
    winbox.style.backgroundColor = `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`
 
    winbox.innerHTML = `
       <div id="winbox-${winboxNumber}-header" class="winbox-header">
-         <p id="winbox-${winboxNumber}-header-title" class="winbox-header-title" winbox-id="winbox-${winboxNumber}" is-dragging="false" is-maximized="false" x-offset="0" y-offset="0" x-resize-start="0" y-resize-start="0">Winbox ${winboxNumber}</p>
+         <p 
+            id="winbox-${winboxNumber}-header-title" 
+            class="winbox-header-title" 
+            winbox-id="winbox-${winboxNumber}" 
+            is-dragging="false" 
+            is-maximized="false" 
+            x-offset="0" 
+            y-offset="0" 
+            x-resize-start="0" 
+            y-resize-start="0"
+            previous-x="0"
+            previous-y="0"
+            previous-width="0"
+            previous-height="0"
+         >Winbox ${winboxNumber}</p>
          <button id="winbox-${winboxNumber}-hide-button">__</button>
          <button id="winbox-${winboxNumber}-min-max-btn" class="min-max-btn">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-square" viewBox="0 0 16 16">
@@ -418,13 +530,14 @@ function createWinbox() {
 
    winbox.style.transform = `translate3d(${randomX}px, ${randomY}px, 0)`;
 
-   deactivateBodyShade(winbox);
+   setAsActiveWinbox(winbox);
 
    addEventListenerToHeaderTitle(winbox);
    addEventListenerToResizers(winbox);
 
    addEventListenerToCloseBtn(winbox);
    addEventListenerToFullScreenBtn(winbox);
+   addEventListenerToMinMaxBtn(winbox);
 }
 
 createWinboxBtn.addEventListener("click", createWinbox);
