@@ -473,8 +473,11 @@ function createWinbox() {
    winbox.setAttribute("id", `winbox-${winboxCount}`);
    
    winbox.classList.add("winbox");
-   winbox.style.backgroundColor = `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`
-   winbox.style.color = `contrast-color(${winbox.style.backgroundColor})`;
+
+   const randomColor = `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`;
+
+   winbox.style.backgroundColor = randomColor;
+   winbox.style.color = `contrast-color(${randomColor})`;
 
    winbox.innerHTML = `
       <div id="winbox-${winboxNumber}-header" class="winbox-header">
