@@ -16,6 +16,7 @@ body,
 
 body {
    height: 100vh;
+   background-color: antiquewhite;
 }
 
 .main {
@@ -175,4 +176,37 @@ div[class*="resize"] {
 
 .maximized-header {
    padding: 0 0.5em 0 0.5em;
+}
+
+.tab-bar {
+   display: flex;
+   position: absolute;
+   bottom: 0;
+}
+
+.winbox-tab {
+   display: flex;
+   width: 10em;
+   padding: 0.5em;
+   border-radius: 1em 1em 0 0;
+   gap: 0.25em;
+   border: 2px outset black;
+   border-bottom: 0;
+   user-select: none;
+   cursor: pointer;
+}
+
+.winbox-tab > button {
+   background-color: transparent;
+   border: 0;
+   margin: 0;
+   padding: 0;
+   display: flex;
+   align-items: center;
+   cursor: pointer;
+}
+
+.winbox-tab > p {
+   flex-grow: 1;
+   font-weight: bold;
 }

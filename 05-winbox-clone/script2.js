@@ -5,11 +5,14 @@ const tabContainer = document.getElementById("tab-bar");
 let globalZIndex = 10;
 let winboxCount = 0;
 
-function getWinBoxId(elementId) {
+function getWinBoxIdAndNumber(elementId) {
    const elementIdArray = elementId.split("-");
    const winboxNumber = elementIdArray.find((idSubstring) => parseInt(idSubstring));
 
-   return `winbox-${winboxNumber}`;
+   return {
+      winboxId : `winbox-${winboxNumber}`,
+      winboxNumber
+   };
 }
 
 function getWinboxPositionAndDimensions(winbox) {
@@ -35,7 +38,7 @@ function getWinboxPositionAndDimensions(winbox) {
 function getWinboxElementsAndStates(event) {
    const elementId = event.currentTarget.getAttribute("id");
 
-   const winboxId = getWinBoxId(elementId);
+   const {winboxId, winboxNumber} = getWinBoxIdAndNumber(elementId);
    const winbox = document.getElementById(winboxId);
 
    const winboxBody = winbox.querySelector(`div[id$="body"]`);
@@ -72,6 +75,7 @@ function getWinboxElementsAndStates(event) {
       elementId,
       winboxHeaderTitle, 
       winboxId, 
+      winboxNumber,
       winbox,
       winboxBody,
       winboxHeader, 
@@ -210,8 +214,11 @@ function winboxDragEnd(e) {
       currentXPos, 
       currentYPos,
       maxX,
-      maxY
+      maxY,
+      isMaximized
    } = getWinboxElementsAndStates(e);
+
+   if(isMaximized) return;
 
    winbox.setAttribute("is-dragging", "false");
    winboxHeaderTitle.releasePointerCapture(e.pointerId);
@@ -289,8 +296,11 @@ function winboxResizeEnd(e) {
       maxX,
       maxY,
       currentWidth,
-      currentHeight
+      currentHeight,
+      isMaximized
    } = getWinboxElementsAndStates(e);
+
+   if(isMaximized) return;
 
    winbox.setAttribute("is-dragging", "false");
 
@@ -466,6 +476,64 @@ function addEventListenerToMinMaxBtn(winbox) {
    minMaxBtn.addEventListener("click", toggleMinMaxWinbox);
 }
 
+function addEventListenerToTabCloseBtn(tab) {
+   const tabCloseBtn = tab.querySelector('button[id$="close-btn"]');
+
+   tabCloseBtn.addEventListener("click", (e) => {
+      const {
+         winboxId
+      } = getWinBoxIdAndNumber(e.currentTarget.getAttribute("id"));
+
+      const winbox = document.getElementById(`${winboxId}`);
+
+      winbox.remove();
+      tab.remove();
+   })
+}
+
+function displayWinboxTab(event) {
+   const {
+      winbox,
+      winboxNumber
+   } = getWinboxElementsAndStates(event);
+
+   const tab = document.createElement("div");
+   tab.classList.add("winbox-tab");
+   tab.style.backgroundColor = winbox.style.backgroundColor;
+   tab.style.color = winbox.style.color;
+
+   tab.innerHTML =  `
+      <p>Winbox ${winboxNumber}</p>
+      <button 
+         id="tab-${winboxNumber}-max-btn"
+         class="tab-max-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-square" viewBox="0 0 16 16">
+               <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/>
+            </svg>
+      </button>
+      <button 
+         id="tab-${winboxNumber}-close-btn"
+         class="tab-close-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+               <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+            </svg>
+      </button>
+   `;
+
+   tabContainer.appendChild(tab);
+
+   addEventListenerToTabCloseBtn(tab);
+}
+
+function addEventListenerToHideBtn(winbox) {
+   const hideBtn = winbox.querySelector('button[id$="hide-button"]');
+
+   hideBtn.addEventListener("click", (e) => {
+      winbox.style.display = "none";
+      displayWinboxTab(e);
+   });
+}
+
 function createWinbox() {
    const winboxNumber = ++winboxCount;
 
@@ -542,6 +610,7 @@ function createWinbox() {
    addEventListenerToCloseBtn(winbox);
    addEventListenerToFullScreenBtn(winbox);
    addEventListenerToMinMaxBtn(winbox);
+   addEventListenerToHideBtn(winbox);
 }
 
 createWinboxBtn.addEventListener("click", createWinbox);
