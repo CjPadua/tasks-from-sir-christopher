@@ -1,11 +1,13 @@
 const WINBOX_WIDTH_RATIO = 0.3;
 const WINBOX_HEIGHT_RATIO = 0.3;
 
-const MINIMUM_WINBOX_WIDTH = 300;
+const MINIMUM_WINBOX_WIDTH = 400;
 const MINIMUM_WINBOX_HEIGHT = 200;
 
 const MINIMUM_WINDOW_WIDTH = 720;
 const MINIMUM_WINDOW_HEIGHT = 480;
+
+let areWinboxesHidden = false;
 
 const createWinboxBtn = document.getElementById("create-winbox-btn");
 const mainContainer = document.getElementById("main");
@@ -44,8 +46,8 @@ function getWinboxPositionAndDimensions(winbox) {
    }
 }
 
-function getWinboxElementsAndStates(event) {
-   const elementId = event.currentTarget.getAttribute("id");
+function getWinboxElementsAndStates(element) {
+   const elementId = element.getAttribute("id");
 
    const {winboxId, winboxNumber} = getWinBoxIdAndNumber(elementId);
    const winbox = document.getElementById(winboxId);
@@ -115,7 +117,7 @@ function initializeWinboxDragOrResize(e) {
       isMaximized, 
       currentXPos, 
       currentYPos
-   } = getWinboxElementsAndStates(e);
+   } = getWinboxElementsAndStates(e.currentTarget);
 
    if(isMaximized) return;
 
@@ -225,7 +227,7 @@ function winboxDragEnd(e) {
       maxX,
       maxY,
       isMaximized
-   } = getWinboxElementsAndStates(e);
+   } = getWinboxElementsAndStates(e.currentTarget);
 
    if(isMaximized) return;
 
@@ -245,7 +247,7 @@ function winboxDrag(e) {
       xOffset,
       yOffset,
       winbox
-   } = getWinboxElementsAndStates(e);
+   } = getWinboxElementsAndStates(e.currentTarget);
 
    if(!isDragging) return;
 
@@ -314,7 +316,7 @@ function winboxResizeEnd(e) {
       currentWidth,
       currentHeight,
       isMaximized
-   } = getWinboxElementsAndStates(e);
+   } = getWinboxElementsAndStates(e.currentTarget);
 
    if(isMaximized) return;
 
@@ -351,7 +353,7 @@ function winboxResize(e) {
       currentHeight,
       xOffset,
       yOffset
-   } = getWinboxElementsAndStates(e);
+   } = getWinboxElementsAndStates(e.currentTarget);
 
    if(!isDragging) return;
 
@@ -460,7 +462,7 @@ function maximizeWinbox(
    winboxHeader.classList.toggle("maximized-header");
 }
 
-function toggleMinMaxWinbox(event) {
+function toggleMinMaxWinbox(e) {
    const {
       winbox,
       winboxBody,
@@ -475,7 +477,7 @@ function toggleMinMaxWinbox(event) {
       currentHeight,
       currentXPos,
       currentYPos
-   } = getWinboxElementsAndStates(event);
+   } = getWinboxElementsAndStates(e.currentTarget);
 
    setAsActiveWinbox(winbox);
 
@@ -553,11 +555,10 @@ function addEventListenerToTabTitle(tab) {
    })
 }
 
-function displayWinboxTab(event) {
+function displayWinboxTab(winbox) {
    const {
-      winbox,
       winboxNumber
-   } = getWinboxElementsAndStates(event);
+   } = getWinBoxIdAndNumber(winbox.getAttribute("id"));
 
    const tab = document.createElement("div");
    tab.classList.add("winbox-tab");
@@ -605,9 +606,9 @@ function addEventListenerToHideBtn(winbox) {
       shiftActiveBodyShade();
 
       winbox.style.display = "none";
-      displayWinboxTab(e);
+      displayWinboxTab(winbox);
 
-      const {isMaximized} = getWinboxElementsAndStates(e);
+      const {isMaximized} = getWinboxElementsAndStates(e.currentTarget);
       if(isMaximized) toggleMinMaxWinbox(e);
    });
 }
@@ -733,5 +734,26 @@ window.addEventListener("resize", () => {
          winbox.offsetWidth,
          winbox.offsetHeight
       );
+   })
+
+   if(
+      window.innerWidth > MINIMUM_WINDOW_WIDTH &&
+      window.innerHeight > MINIMUM_WINDOW_HEIGHT
+   ) {
+      createWinboxBtn.disabled = false;
+      areWinboxesHidden = false;
+      return;
+   }
+
+   if(areWinboxesHidden) return;
+
+   createWinboxBtn.disabled = true;
+   areWinboxesHidden = true;
+
+   tabContainer.replaceChildren();
+
+   winboxes.forEach((winbox) => {
+      winbox.style.display = "none";
+      displayWinboxTab(winbox);
    })
 })
