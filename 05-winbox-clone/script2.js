@@ -254,25 +254,32 @@ function addEventListenerToHeaderTitle(winbox) {
    winboxHeaderTitle.addEventListener("pointermove", winboxDrag);
 }
 
+function shiftActiveBodyShade() {
+   const winboxes = Array.from(document.querySelectorAll(".winbox"));
+
+   let winboxIndex = 0;
+   let greatestZIndex = 0;
+
+   winboxes.forEach((winbox, index) => {
+      if(
+         winbox.style.zIndex > greatestZIndex &&
+         winbox.style.zIndex < globalZIndex - 1
+      ) {
+         greatestZIndex = winbox.style.zIndex;
+         winboxIndex = index;
+      }
+   })
+
+   winboxes[winboxIndex]?.querySelector('div[id$="body-shade"]').classList.add("inactive-body-shade");
+}
+
 function addEventListenerToCloseBtn(winbox) {
    const closeBtn = winbox.querySelector('button[id$="close-btn"]');
 
    closeBtn.addEventListener("click", () => {
       winbox.remove();
 
-      const winboxes = Array.from(document.querySelectorAll(".winbox"));
-   
-      let winboxIndex = 0;
-      let greatestZIndex = 0;
-   
-      winboxes.forEach((winbox, index) => {
-         if(winbox.style.zIndex > greatestZIndex) {
-            greatestZIndex = winbox.style.zIndex;
-            winboxIndex = index;
-         }
-      })
-   
-      winboxes[winboxIndex]?.querySelector('div[id$="body-shade"]').classList.add("inactive-body-shade");
+      shiftActiveBodyShade();
    })
 
 }
@@ -480,6 +487,9 @@ function addEventListenerToTabCloseBtn(tab) {
    const tabCloseBtn = tab.querySelector('button[id$="close-btn"]');
 
    tabCloseBtn.addEventListener("click", (e) => {
+
+      shiftActiveBodyShade();
+
       const {
          winboxId
       } = getWinBoxIdAndNumber(e.currentTarget.getAttribute("id"));
@@ -504,6 +514,8 @@ function addEventListenerToTabMaxBtn(tab) {
       const winbox = document.getElementById(`${winboxId}`);
       winbox.style.display = "flex";
 
+      setAsActiveWinbox(winbox);
+
       const winboxBody = winbox.querySelector(`div[id$="body"]`);
       const winboxHeader = winbox.querySelector(`div[id$="header"]`);
       const currentXPos = Number(winbox.getBoundingClientRect().x);
@@ -526,6 +538,8 @@ function addEventListenerToTabTitle(tab) {
       } = getWinBoxIdAndNumber(e.currentTarget.getAttribute("id"));
 
       const winbox = document.getElementById(`${winboxId}`);
+      setAsActiveWinbox(winbox);
+
       winbox.style.display = "flex";
    })
 }
@@ -573,6 +587,8 @@ function addEventListenerToHideBtn(winbox) {
    const hideBtn = winbox.querySelector('button[id$="hide-button"]');
 
    hideBtn.addEventListener("click", (e) => {
+      shiftActiveBodyShade();
+
       winbox.style.display = "none";
       displayWinboxTab(e);
 
