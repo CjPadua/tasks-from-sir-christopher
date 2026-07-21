@@ -9,7 +9,7 @@ const MINIMUM_WINDOW_HEIGHT = 480;
 
 let areWinboxesHidden = false;
 
-const createWinboxBtn = document.getElementById("create-winbox-btn");
+const createWinboxBtns = document.querySelectorAll(".create-winbox-btn");
 const mainContainer = document.getElementById("main");
 const tabContainer = document.getElementById("tab-bar");
 
@@ -59,6 +59,7 @@ function getWinboxElementsAndStates(element) {
    const isDragging = winbox.getAttribute("is-dragging") === "true";
    const isMaximized = winbox.getAttribute("is-maximized") === "true";
    const isResizing = winbox.getAttribute("is-resizing") === "true";
+   const isHidden = winbox.getAttribute("is-hidden") === "true";
 
    const xOffset = Number(winbox.getAttribute("x-offset"));
    const yOffset = Number(winbox.getAttribute("y-offset"));
@@ -71,6 +72,9 @@ function getWinboxElementsAndStates(element) {
 
    const previousWidth = Number(winbox.getAttribute("previous-width"));
    const previousHeight = Number(winbox.getAttribute("previous-height"));
+
+   const minWidth = Number(winbox.getAttribute("minWidth"));
+   const minHeight = Number(winbox.getAttribute("minHeight"));
    
    const {
       currentXPos, 
@@ -106,7 +110,10 @@ function getWinboxElementsAndStates(element) {
       previousX,
       previousY,
       previousWidth,
-      previousHeight
+      previousHeight,
+      minHeight,
+      minWidth,
+      isHidden
    };
 }
 
@@ -143,7 +150,7 @@ function checkForOutbound(x, maxX, y, maxY, event) {
    if(x < 0) {
       outBounds.push("left");
    }
-   else if (maxX >= 0 && x >= maxX) {
+   else if (x >= maxX) {
       outBounds.push("right");
    }
 
@@ -154,7 +161,7 @@ function checkForOutbound(x, maxX, y, maxY, event) {
    if (y < 0) {
       outBounds.push("top");
    }
-   else if (maxY >= 0 && y > maxY) {
+   else if (y > maxY) {
       outBounds.push("bottom");
    }
 
@@ -352,7 +359,9 @@ function winboxResize(e) {
       currentWidth,
       currentHeight,
       xOffset,
-      yOffset
+      yOffset,
+      minWidth,
+      minHeight
    } = getWinboxElementsAndStates(e.currentTarget);
 
    if(!isDragging) return;
@@ -386,6 +395,8 @@ function winboxResize(e) {
 
    const newWidth = currentWidth + xToAdd;
    const newHeight = currentHeight + yToAdd;
+
+   if(newWidth < minWidth || newHeight < minHeight) return;
 
    dragWinbox(winbox, newX, newY);
    scaleWinbox(winbox, newWidth, newHeight);
@@ -455,6 +466,7 @@ function maximizeWinbox(
    winbox.setAttribute("previous-height", currentHeight);
 
    winbox.setAttribute("is-maximized", "true");
+   winbox.setAttribute("is-hidden", "false");
 
    winbox.style.transform = `translate3d(0px, 0px, 0)`;
    winbox.classList.toggle("maximized-window");
@@ -550,8 +562,9 @@ function addEventListenerToTabTitle(tab) {
 
       const winbox = document.getElementById(`${winboxId}`);
       setAsActiveWinbox(winbox);
-
+      
       winbox.style.display = "flex";
+      winbox.setAttribute("is-hidden", "false");
    })
 }
 
@@ -597,6 +610,8 @@ function displayWinboxTab(winbox) {
    addEventListenerToTabCloseBtn(tab);
    addEventListenerToTabMaxBtn(tab);
    addEventListenerToTabTitle(tab);
+
+   winbox.setAttribute("is-hidden", "true");
 }
 
 function addEventListenerToHideBtn(winbox) {
@@ -613,11 +628,18 @@ function addEventListenerToHideBtn(winbox) {
    });
 }
 
-function createWinbox() {
+function createWinbox(e) {
    const winboxNumber = ++winboxCount;
+
+   const minWidth = e.currentTarget.getAttribute("minWidth");
+   const minHeight = e.currentTarget.getAttribute("minHeight");
 
    const winbox = document.createElement("div");
    winbox.setAttribute("id", `winbox-${winboxCount}`);
+
+   winbox.setAttribute("minWidth", minWidth);
+   winbox.setAttribute("minHeight", minHeight);
+   winbox.setAttribute("is-hidden", "false");
    
    winbox.classList.add("winbox");
 
@@ -676,19 +698,8 @@ function createWinbox() {
    winbox.style.backgroundColor = randomColor;
    winbox.style.color = `contrast-color(${randomColor})`;
 
-   let winboxWidth = window.innerWidth * WINBOX_WIDTH_RATIO;
-   let winboxHeight = window.innerHeight * WINBOX_HEIGHT_RATIO;
-
-   if(winboxWidth < MINIMUM_WINBOX_WIDTH) {
-      winboxWidth = MINIMUM_WINBOX_WIDTH;
-   }
-
-   if(winboxHeight < MINIMUM_WINBOX_HEIGHT) {
-      winboxHeight = MINIMUM_WINBOX_HEIGHT;
-   }
-
-   winbox.style.width = `${winboxWidth}px`;
-   winbox.style.height = `${winboxHeight}px`;
+   winbox.style.minWidth = `${minWidth}px`;
+   winbox.style.minHeight = `${minHeight}px`;
 
    const winboxButtons = Array.from(winbox.querySelectorAll("button"));
    winboxButtons.forEach((winboxButton) => {
@@ -711,7 +722,9 @@ function createWinbox() {
    addEventListenerToHideBtn(winbox);
 }
 
-createWinboxBtn.addEventListener("click", createWinbox);
+createWinboxBtns.forEach((createWinboxBtn) => {
+   createWinboxBtn.addEventListener("click", createWinbox);
+})
 
 window.addEventListener("resize", () => {
    const winboxes = document.querySelectorAll(".winbox");
@@ -722,9 +735,24 @@ window.addEventListener("resize", () => {
          currentXPos, 
          currentYPos,
          maxX,
-         maxY
-      } = getWinboxPositionAndDimensions(winbox);
+         maxY,
+         minHeight,
+         minWidth,
+         isHidden
+      } = getWinboxElementsAndStates(winbox);
 
+      if(
+         (
+            window.innerWidth < minWidth ||
+            window.innerHeight < minHeight
+         ) &&
+         !isHidden
+      ) {
+         winbox.style.display = "none";
+         displayWinboxTab(winbox);
+         return;
+      }
+      
       correctOutbounds("resize", 
          winbox, 
          currentXPos, 
@@ -734,26 +762,6 @@ window.addEventListener("resize", () => {
          winbox.offsetWidth,
          winbox.offsetHeight
       );
-   })
 
-   if(
-      window.innerWidth > MINIMUM_WINDOW_WIDTH &&
-      window.innerHeight > MINIMUM_WINDOW_HEIGHT
-   ) {
-      createWinboxBtn.disabled = false;
-      areWinboxesHidden = false;
-      return;
-   }
-
-   if(areWinboxesHidden) return;
-
-   createWinboxBtn.disabled = true;
-   areWinboxesHidden = true;
-
-   tabContainer.replaceChildren();
-
-   winboxes.forEach((winbox) => {
-      winbox.style.display = "none";
-      displayWinboxTab(winbox);
    })
 })

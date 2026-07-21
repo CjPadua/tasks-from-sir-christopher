@@ -210,3 +210,7 @@ div[class*="resize"] {
    flex-grow: 1;
    font-weight: bold;
 }
+
+.create-winbox-btn {
+   padding: 0.5em;
+}
