@@ -565,6 +565,28 @@ function addEventListenerToTabTitle(tab) {
       
       winbox.style.display = "flex";
       winbox.setAttribute("is-hidden", "false");
+
+      const {
+         currentXPos, 
+         currentYPos,
+         maxX,
+         maxY,
+         minHeight,
+         minWidth,
+         isHidden,
+         winboxNumber
+      } = getWinboxElementsAndStates(winbox);
+
+      correctOutbounds("resize", 
+         winbox, 
+         currentXPos, 
+         maxX, 
+         currentYPos, 
+         maxY,
+         winbox.offsetWidth,
+         winbox.offsetHeight
+      );
+
    })
 }
 
