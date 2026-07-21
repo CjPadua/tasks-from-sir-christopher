@@ -25,8 +25,8 @@ body {
 
 .winbox {
    border: 2px outset black;
-   height: 200px;
-   width: 300px;
+   /* height: 200px;
+   width: 300px; */
    position: absolute;
    left: 0px;
    top: 0px;

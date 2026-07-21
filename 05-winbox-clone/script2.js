@@ -1,3 +1,12 @@
+const WINBOX_WIDTH_RATIO = 0.3;
+const WINBOX_HEIGHT_RATIO = 0.3;
+
+const MINIMUM_WINBOX_WIDTH = 300;
+const MINIMUM_WINBOX_HEIGHT = 200;
+
+const MINIMUM_WINDOW_WIDTH = 720;
+const MINIMUM_WINDOW_HEIGHT = 480;
+
 const createWinboxBtn = document.getElementById("create-winbox-btn");
 const mainContainer = document.getElementById("main");
 const tabContainer = document.getElementById("tab-bar");
@@ -666,6 +675,20 @@ function createWinbox() {
    winbox.style.backgroundColor = randomColor;
    winbox.style.color = `contrast-color(${randomColor})`;
 
+   let winboxWidth = window.innerWidth * WINBOX_WIDTH_RATIO;
+   let winboxHeight = window.innerHeight * WINBOX_HEIGHT_RATIO;
+
+   if(winboxWidth < MINIMUM_WINBOX_WIDTH) {
+      winboxWidth = MINIMUM_WINBOX_WIDTH;
+   }
+
+   if(winboxHeight < MINIMUM_WINBOX_HEIGHT) {
+      winboxHeight = MINIMUM_WINBOX_HEIGHT;
+   }
+
+   winbox.style.width = `${winboxWidth}px`;
+   winbox.style.height = `${winboxHeight}px`;
+
    const winboxButtons = Array.from(winbox.querySelectorAll("button"));
    winboxButtons.forEach((winboxButton) => {
       winboxButton.style.color = `contrast-color(${randomColor})`;
@@ -701,6 +724,14 @@ window.addEventListener("resize", () => {
          maxY
       } = getWinboxPositionAndDimensions(winbox);
 
-      correctOutbounds("drag", winbox, currentXPos, maxX, currentYPos, maxY);
+      correctOutbounds("resize", 
+         winbox, 
+         currentXPos, 
+         maxX, 
+         currentYPos, 
+         maxY,
+         winbox.offsetWidth,
+         winbox.offsetHeight
+      );
    })
 })
