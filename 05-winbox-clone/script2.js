@@ -474,6 +474,7 @@ function createWinbox() {
    
    winbox.classList.add("winbox");
    winbox.style.backgroundColor = `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`
+   winbox.style.color = `contrast-color(${winbox.style.backgroundColor})`;
 
    winbox.innerHTML = `
       <div id="winbox-${winboxNumber}-header" class="winbox-header">
