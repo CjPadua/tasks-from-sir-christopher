@@ -491,7 +491,7 @@ function addEventListenerToTabCloseBtn(tab) {
    })
 }
 
-function addEventListenerToMaxBtn(tab) {
+function addEventListenerToTabMaxBtn(tab) {
    const tabMaxBtn = tab.querySelector('button[id$="max-btn"]');
 
    tabMaxBtn.addEventListener("click", (e) => {
@@ -515,6 +515,21 @@ function addEventListenerToMaxBtn(tab) {
    })
 }
 
+function addEventListenerToTabTitle(tab) {
+   const tabTitle = tab.querySelector('p[id$="title"]');
+
+   tabTitle.addEventListener("click", (e) => {
+      tab.remove();
+
+      const {
+         winboxId
+      } = getWinBoxIdAndNumber(e.currentTarget.getAttribute("id"));
+
+      const winbox = document.getElementById(`${winboxId}`);
+      winbox.style.display = "flex";
+   })
+}
+
 function displayWinboxTab(event) {
    const {
       winbox,
@@ -527,7 +542,10 @@ function displayWinboxTab(event) {
    tab.style.color = winbox.style.color;
 
    tab.innerHTML =  `
-      <p>Winbox ${winboxNumber}</p>
+      <p
+         id="tab-${winboxNumber}-title"
+         class="tab-title">Winbox ${winboxNumber}
+      </p>
       <button 
          id="tab-${winboxNumber}-max-btn"
          class="tab-max-btn">
@@ -547,7 +565,8 @@ function displayWinboxTab(event) {
    tabContainer.appendChild(tab);
 
    addEventListenerToTabCloseBtn(tab);
-   addEventListenerToMaxBtn(tab);
+   addEventListenerToTabMaxBtn(tab);
+   addEventListenerToTabTitle(tab);
 }
 
 function addEventListenerToHideBtn(winbox) {
