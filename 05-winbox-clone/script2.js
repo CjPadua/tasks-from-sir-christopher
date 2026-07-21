@@ -491,6 +491,30 @@ function addEventListenerToTabCloseBtn(tab) {
    })
 }
 
+function addEventListenerToMaxBtn(tab) {
+   const tabMaxBtn = tab.querySelector('button[id$="max-btn"]');
+
+   tabMaxBtn.addEventListener("click", (e) => {
+      tab.remove();
+
+      const {
+         winboxId
+      } = getWinBoxIdAndNumber(e.currentTarget.getAttribute("id"));
+
+      const winbox = document.getElementById(`${winboxId}`);
+      winbox.style.display = "flex";
+
+      const winboxBody = winbox.querySelector(`div[id$="body"]`);
+      const winboxHeader = winbox.querySelector(`div[id$="header"]`);
+      const currentXPos = Number(winbox.getBoundingClientRect().x);
+      const currentYPos = Number(winbox.getBoundingClientRect().y);
+      const currentWidth = Number(winbox.offsetWidth);
+      const currentHeight = Number(winbox.offsetHeight);
+
+      maximizeWinbox(winbox, winboxBody, winboxHeader, currentXPos,currentYPos, currentWidth, currentHeight);
+   })
+}
+
 function displayWinboxTab(event) {
    const {
       winbox,
@@ -523,6 +547,7 @@ function displayWinboxTab(event) {
    tabContainer.appendChild(tab);
 
    addEventListenerToTabCloseBtn(tab);
+   addEventListenerToMaxBtn(tab);
 }
 
 function addEventListenerToHideBtn(winbox) {
@@ -531,6 +556,9 @@ function addEventListenerToHideBtn(winbox) {
    hideBtn.addEventListener("click", (e) => {
       winbox.style.display = "none";
       displayWinboxTab(e);
+
+      const {isMaximized} = getWinboxElementsAndStates(e);
+      if(isMaximized) toggleMinMaxWinbox(e);
    });
 }
 
