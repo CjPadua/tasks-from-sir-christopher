@@ -574,6 +574,7 @@ function displayWinboxTab(winbox) {
    } = getWinBoxIdAndNumber(winbox.getAttribute("id"));
 
    const tab = document.createElement("div");
+   tab.setAttribute("id", `winbox-${winboxNumber}-tab`);
    tab.classList.add("winbox-tab");
    
    tab.innerHTML =  `
@@ -738,7 +739,8 @@ window.addEventListener("resize", () => {
          maxY,
          minHeight,
          minWidth,
-         isHidden
+         isHidden,
+         winboxNumber
       } = getWinboxElementsAndStates(winbox);
 
       if(
@@ -750,6 +752,26 @@ window.addEventListener("resize", () => {
       ) {
          winbox.style.display = "none";
          displayWinboxTab(winbox);
+         return;
+      }
+
+      if(isHidden) {
+
+         const tab = tabContainer.querySelector(`#winbox-${winboxNumber}-tab`);
+
+         if (
+            window.innerWidth < minWidth ||
+            window.innerHeight < minHeight
+         ) {
+            tab.classList.add("disabled-tab");
+         }
+         else if (            
+            window.innerWidth > minWidth &&
+            window.innerHeight > minHeight
+         ) {
+            tab.classList.remove("disabled-tab");
+         }
+
          return;
       }
       
